@@ -959,7 +959,7 @@ function _convert_date($matches, &$date) {
       return FALSE;
     }
     if ($date === FALSE) {
-      watchdog( 'gc', 'Error converting date ['.$str_date.'].');
+      watchdog( 'gc', 'Error converting date ['.$str_date.'] (1).');
       return FALSE;
     }
     return TRUE;
@@ -990,7 +990,7 @@ function form_validate_date( $str_date, &$date) {
     return FALSE;
   }
   if ($date === FALSE) {
-    watchdog( 'gc', 'Error converting date ['.$str_date.'].');
+    watchdog( 'gc', 'Error converting date ['.$str_date.'] (2).');
     return FALSE;
   }
   return TRUE;
@@ -1237,7 +1237,7 @@ function _validate_measurement( &$the_measurements, $i, $groups = false) {
   } else {
     if ( $the_measurements['conv_date_'.$i] == null) {
       // What to do with a null-date??
-      watchdog( 'gc', 'Error converting date ['.$the_measurements['date_'.$i].'].');
+      watchdog( 'gc', 'Error converting date ['.$the_measurements['date_'.$i].'] (3).');
       form_set_error('date_'.$i, t('Er is iets mis met ons datum systeem waardoor we de gamarkeerde datum vandaag niet kunnen omzetten, probeer morgen nogmaals.'));
       $all_ok = FALSE;
     }
@@ -1788,7 +1788,10 @@ function _setup_axis_scale(&$graph, $time_span, $max_y, $min_y) {
 			$graph->xaxis->SetTitle( t('years'));
 			break;
 		default:
-			watchdog( 'gc', 'Error setting axis scale, unknown timespan:'.$time_span.'.');
+			watchdog( 'gc', 'Error setting axis scale, unknown timespan:'.$time_span.', default to 18 years.');
+			$graph->SetScale('linlin', $min_y, $max_y, 0, 18);
+			$graph->xaxis->scale->ticks->Set(2, 1);
+			$graph->xaxis->SetTitle( t('years'));
 			break;
 	}
 }
