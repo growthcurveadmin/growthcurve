@@ -959,7 +959,7 @@ function _convert_date($matches, &$date) {
       return FALSE;
     }
     if ($date === FALSE) {
-      watchdog( 'gc', 'Error converting date ['.$str_date.'] (1).');
+      watchdog( 'gc', 'Error converting date ['.implode(",", $matches).'] (1).');
       return FALSE;
     }
     return TRUE;
