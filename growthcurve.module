@@ -1473,6 +1473,10 @@ function growthcurve_measurements($child_id = -1, $field_to_focus = NULL) {
             $nr_del++;
           } else {
             //drupal_set_message( 'Update '.$the_measurements['measurement_id_'.$i]);
+            if (($the_measurements['conv_date_'.$i] == 0) || ($the_measurements['conv_date_'.$i] == null)) {
+            	// TODO: we could just stop here, as the date can never be 0 as we always aff 5 hours... (dirty hack)
+            	watchdog( 'gc', 'Something strange with the date...:'.$the_measurements['date_'.$i].",\n"._vds($the_measurements, 'the_measurements').'.');
+            }
             db_query( "UPDATE {growthcurve_measurements} SET moment = '%s', weight = %s, length = %s, comments = '%s' WHERE child_id = %d AND measurement_id = %d",
                       $the_measurements['conv_date_'.$i],
                       is_numeric( $the_measurements['weight_'.$i]) ? $the_measurements['weight_'.$i] : 'NULL',
