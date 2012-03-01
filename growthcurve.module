@@ -461,6 +461,7 @@ function growthcurve_block($op = 'list', $delta = 0)
  */
 function growthcurve_ref_curve_list()
 {
+    global $user;
     $result = db_query("SELECT * FROM {growthcurve_ref_curves} ORDER BY name", $user->uid);
     $rows = array();
     while ($ref_curve = db_fetch_array($result)) {
@@ -689,7 +690,7 @@ function growthcurve_admin_ref_edit($ref_id = '')
 
     $form = growthcurve_ref_curve_form($ref_curve);
     $form .= form_submit(t('Save reference curve'));
-    $output .= form($form);
+    $output = form($form);
 
     return $output;
 }
@@ -1104,7 +1105,7 @@ function growthcurve_child_add()
     }
     $form = growthcurve_child_form($child);
     $form .= form_submit(t('Add child'));
-    $output .= form($form);
+    $output = form($form);
 
     $output .= _SetFocusField('name');
 
@@ -1116,7 +1117,7 @@ function _get_child($child_id)
     return db_fetch_object(db_query("SELECT * FROM {growthcurve_children} WHERE child_id = " . $child_id));
 }
 
-/*
+/**
  *
  */
 function get_time_span_entered($child_id)
@@ -1128,6 +1129,9 @@ function get_time_span_entered($child_id)
 /**
  * Menu call-back: This will show a edit screen for a child
  * It will also give feed-back when not all required fields have been filled-in correctly
+ * @param $child_id
+ * @param null $field_to_focus
+ * @return
  */
 function growthcurve_child_edit($child_id, $field_to_focus = NULL)
 {
@@ -1161,7 +1165,7 @@ function growthcurve_child_edit($child_id, $field_to_focus = NULL)
 
     $form = growthcurve_child_form($child);
     $form .= form_submit(t('Save child'));
-    $output .= form($form);
+    $output = form($form);
 
     if ($field_to_focus == 'date') {
         $output .= _SetFocusField('date');
@@ -1585,6 +1589,7 @@ DEFINE("TS_YEAR", 31536000);
 function _get_graph_sizes($age)
 {
     // What is the ref curve range to use:
+    $gs = new object();
     if ($age <= 31536000) {
         $gs->time_span = TS_YEAR;
         $gs->xunits = TS_WEEK;
@@ -2283,6 +2288,7 @@ function growthcurve_user_search($email, $host = '')
     }
     $firephp->fb($messages, FirePHP::INFO);
 
+    $info = new object();
     $info->users = $users;
     $info->messages = $messages;
     $info->children = $children;
