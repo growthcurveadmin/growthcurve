@@ -33,7 +33,7 @@ if (!function_exists('_vds')) {
     {
         global $user;
         // Only the site admin is able to proceed here.
-        if ($user->uid != 1) return;
+        if ($user->uid != 1) return '';
         ob_start();
         echo (!empty($title) ? ($title . ':') : '') . '<pre>';
         var_dump($mixed);
@@ -99,8 +99,8 @@ function _help_info()
 
 /**
  * Display help and module information
- * @param section which section of the site we're displaying help
- * @return help text for section
+ * @param string $section which section of the site we're displaying help
+ * @return string help text for section
  */
 function growthcurve_help($section = '')
 {
@@ -358,8 +358,8 @@ function growthcurve_perm()
     );
 } // function growthcurve_perm()
 
-DEFINE("CHILDNOTFOUND", -1);
-DEFINE("NOTYOURCHILD", -2);
+define("CHILDNOTFOUND", -1);
+define("NOTYOURCHILD", -2);
 
 /**
  * Check if the given child_id is of a child that is ours
@@ -1576,20 +1576,24 @@ function growthcurve_measurements($child_id = -1, $field_to_focus = NULL)
 }
 
 // A week 7 * 24 * 60 * 60 = 604800
-DEFINE("TS_WEEK", 604800);
+define("TS_WEEK", 604800);
 // Long month: 31 * 24 * 60 * 60 (a month) = 2678400
 // Avarage month: 31536000 / 12
-DEFINE("TS_ARG_MONTH", 2628000);
+define("TS_ARG_MONTH", 2628000);
 // Year: 60 * 60 * 24 * 365 = 31536000
-DEFINE("TS_YEAR", 31536000);
+define("TS_YEAR", 31536000);
+
+class GraphSizes {}
 
 /**
- * What are the sizes to use in the graphs based on the age of the child
+ * What are the sizes to use in the graphs based on the age of the child.
+ * @param int $age the age of the child
+ * @return \GraphSizes the sizes to use
  */
 function _get_graph_sizes($age)
 {
     // What is the ref curve range to use:
-    $gs = new object();
+    $gs = new GraphSizes;
     if ($age <= 31536000) {
         $gs->time_span = TS_YEAR;
         $gs->xunits = TS_WEEK;
@@ -1707,7 +1711,7 @@ function _add_official_curves(&$graph, $gender, $type, $age, &$max_value, &$min_
         $moments = array();
         $result = db_query("SELECT moment, $value_field_name FROM {growthcurve_ref_curves_measurements} WHERE curve_id = $ref_id AND NOT IsNull( $value_field_name) ORDER BY moment");
         while ($measurement = db_fetch_array($result)) {
-            if ($measurement[moment] > ($date_of_birth + $gs->time_span)) {
+            if ($measurement['moment'] > ($date_of_birth + $gs->time_span)) {
                 break;
             }
             if ($measurement[$value_field_name] > $max_value) {
@@ -1717,7 +1721,7 @@ function _add_official_curves(&$graph, $gender, $type, $age, &$max_value, &$min_
                 $min_value = $measurement[$value_field_name];
             }
             $measurement_nominal[] = $measurement[$value_field_name];
-            $moments[] = ($measurement[moment] - $date_of_birth) / $gs->xunits;
+            $moments[] = ($measurement['moment'] - $date_of_birth) / $gs->xunits;
         }
         //$bgcolor = ( $grp == -($ref_curves_groups) ? 'white' : (( abs( $grp) & 1) == 1 ? 'lightcyan' : 'aliceblue'));
         $bgcolor = $grp >= -1 && $grp <= 0 ? "darkseagreen1" : "white";
@@ -1747,14 +1751,14 @@ function _add_childs_curve($child_id, $type, $xunits, $lineColor = 'black')
     while ($measurement = db_fetch_array($result)) {
         // TODO: make more than one range possible (for now only first year)
         // Max show 18 years
-        if ($measurement[moment] > ($date_of_birth + 567648000)) {
+        if ($measurement['moment'] > ($date_of_birth + 567648000)) {
             // day 24 * 60 * 60: 86400
             // big year in sec: 400 * 24 * 60 * 60: 34560000
             // about two years: ((365 * 2) + 31) * 24 * 60 * 60: 65750400
             break;
         }
         $measurements[] = $measurement[$type];
-        $moments[] = ($measurement[moment] - $date_of_birth) / $xunits;
+        $moments[] = ($measurement['moment'] - $date_of_birth) / $xunits;
     }
     if (count($measurements) <= 0) {
         // Make sure we have at least one measurement
@@ -2288,7 +2292,8 @@ function growthcurve_user_search($email, $host = '')
     }
     $firephp->fb($messages, FirePHP::INFO);
 
-    $info = new object();
+    class UserInfo {}
+    $info = new UserInfo;
     $info->users = $users;
     $info->messages = $messages;
     $info->children = $children;
