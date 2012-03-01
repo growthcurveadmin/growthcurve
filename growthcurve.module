@@ -4,7 +4,7 @@
  * Controls the boxes that are displayed around the main content.
  * $Id: growthcurve.module,v 1.21 2007/11/21 23:59:46 gerke Exp $
  */
- 
+
 // Lots of things TODO:
 
 // Structure
@@ -16,39 +16,42 @@
 //
 
 if (!function_exists('_vd')) {
-  function _vd($mixed, $title = '', $exit = false) {
-    global $user;
-    // Only the site admin is able to proceed here.
-    if ($user->uid != 1) return;
-    echo (!empty($title) ? ($title .':') : '') .'<pre>';
-    var_dump($mixed);
-    echo "</pre>\n";
-    if ($exit) exit;
-  }
+    function _vd($mixed, $title = '', $exit = false)
+    {
+        global $user;
+        // Only the site admin is able to proceed here.
+        if ($user->uid != 1) return;
+        echo (!empty($title) ? ($title . ':') : '') . '<pre>';
+        var_dump($mixed);
+        echo "</pre>\n";
+        if ($exit) exit;
+    }
 }
 
 if (!function_exists('_vds')) {
-  function _vds($mixed, $title = '', $exit = false) {
-    global $user;
-    // Only the site admin is able to proceed here.
-    if ($user->uid != 1) return;
-    ob_start();
-    echo (!empty($title) ? ($title .':') : '') .'<pre>';
-    var_dump($mixed);
-    echo "</pre>\n";
-    $output = ob_get_contents();
-    ob_end_clean();
-    if ($exit) exit;
-    return $output;
-  }
+    function _vds($mixed, $title = '', $exit = false)
+    {
+        global $user;
+        // Only the site admin is able to proceed here.
+        if ($user->uid != 1) return;
+        ob_start();
+        echo (!empty($title) ? ($title . ':') : '') . '<pre>';
+        var_dump($mixed);
+        echo "</pre>\n";
+        $output = ob_get_contents();
+        ob_end_clean();
+        if ($exit) exit;
+        return $output;
+    }
 }
 
-function show($data, $func = "print_r", $return_str = false){
-   ob_start();
-   $func($data);
-   $output = '<pre>'.htmlspecialchars(ob_get_contents()).'</pre>';
-   ob_end_clean();
-   if($return_str) return $output; else echo $output;
+function show($data, $func = "print_r", $return_str = false)
+{
+    ob_start();
+    $func($data);
+    $output = '<pre>' . htmlspecialchars(ob_get_contents()) . '</pre>';
+    ob_end_clean();
+    if ($return_str) return $output; else echo $output;
 }
 
 require_once("growthcurve.config");
@@ -56,12 +59,13 @@ require_once("growthcurve.config");
 //
 // This function is used to check if this module yielded HTML or graphics
 //
-function isHTMLOutput($set = NULL) {
-	static $f_isHTMLOutput = true;
-	if (isset($set)) {
-		$f_isHTMLOutput = $set;
-	}
-	return $f_isHTMLOutput;
+function isHTMLOutput($set = NULL)
+{
+    static $f_isHTMLOutput = true;
+    if (isset($set)) {
+        $f_isHTMLOutput = $set;
+    }
+    return $f_isHTMLOutput;
 }
 
 /**
@@ -70,7 +74,7 @@ function isHTMLOutput($set = NULL) {
  */
 function _SetFocusField($focus_field)
 {
-  return '<SCRIPT TYPE="text/javascript">
+    return '<SCRIPT TYPE="text/javascript">
   <!--
   /* To get to a element quickly */
   function getById(id) {
@@ -78,7 +82,7 @@ function _SetFocusField($focus_field)
     if(document.all)            return document.all[id]
   }
   // Make sure the uname field is focused.
-  getById( "edit-'.$focus_field.'").focus();
+  getById( "edit-' . $focus_field . '").focus();
 
   //-->
 </SCRIPT>
@@ -88,8 +92,9 @@ function _SetFocusField($focus_field)
 /**
  * Return the help to give an over view of what can be done with this site.
  */
-function _help_info() {
-	return t( "Welcome to Growth curve.<br> As this is the first time you use Growth cruve, I want to introduce the system to you in short.<br>At the top of this page.");
+function _help_info()
+{
+    return t("Welcome to Growth curve.<br> As this is the first time you use Growth cruve, I want to introduce the system to you in short.<br>At the top of this page.");
 }
 
 /**
@@ -97,256 +102,264 @@ function _help_info() {
  * @param section which section of the site we're displaying help
  * @return help text for section
  */
-function growthcurve_help($section='') {
-  $output = '';
-  switch ($section) {
-    case "admin/modules#description":
-      $output = t("Helps parents keep track of their childrens growing");
-      break;
-    case "admin/help#growthcurve":
-      $output = t("This module will help parents to keep track of the growing of their children.");
-      break;
-  }
-  return $output;
+function growthcurve_help($section = '')
+{
+    $output = '';
+    switch ($section) {
+        case "admin/modules#description":
+            $output = t("Helps parents keep track of their childrens growing");
+            break;
+        case "admin/help#growthcurve":
+            $output = t("This module will help parents to keep track of the growing of their children.");
+            break;
+    }
+    return $output;
 } // function growthcurve_help
 
 /**
  * Give an overview of what you can do with this site.
  */
-function growthcurve_help_info() {
-	print theme('page', _help_info() . '<br>' . _add_child_link());
+function growthcurve_help_info()
+{
+    print theme('page', _help_info() . '<br>' . _add_child_link());
 }
 
 /**
  * Get the first ref curve according to a defined sort order
  * @return id of the first ref curve
  */
-function _get_first_ref_curve() {
-  $ref_curve = db_fetch_object( db_query( "SELECT curve_id FROM {growthcurve_ref_curves} ORDER BY name"));
-	if ( $ref_curve) {
-		return $ref_curve->curve_id;
-	}
-	return null;
+function _get_first_ref_curve()
+{
+    $ref_curve = db_fetch_object(db_query("SELECT curve_id FROM {growthcurve_ref_curves} ORDER BY name"));
+    if ($ref_curve) {
+        return $ref_curve->curve_id;
+    }
+    return null;
 }
 
 /**
  * Get the first child according to a defined sort order
  * @return id of the first child
  */
-function _get_first_child() {
-	global $user;
-	$child = db_fetch_object( db_query( "SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid));
-	if ( $child) {
-		return $child->child_id;
-	}
-	return null;
+function _get_first_child()
+{
+    global $user;
+    $child = db_fetch_object(db_query("SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid));
+    if ($child) {
+        return $child->child_id;
+    }
+    return null;
 }
 
-function _add_child_list_link() {
-	return l(t("List children") . ' >>', "growthcurve", array("title" => t("Show a list of your children")));
+function _add_child_list_link()
+{
+    return l(t("List children") . ' >>', "growthcurve", array("title" => t("Show a list of your children")));
 }
 
-function _add_child_link() {
-	return l(t("Add child") . ' >>', "growthcurve/add", array("title" => t("Add child")));
+function _add_child_link()
+{
+    return l(t("Add child") . ' >>', "growthcurve/add", array("title" => t("Add child")));
 }
 
 /**
  * Implementation of hook_menu().
  */
-function growthcurve_menu($may_cache) {
-  $items = array();
+function growthcurve_menu($may_cache)
+{
+    $items = array();
 
-  if ($may_cache) {
-    // provide menus for users that are gc admins
-    $items[] = array(
-      'path' => 'admin/growthcurve',
-      'title' => t('gc reference curves'),
-      'callback' => 'growthcurve_admin',
-      'access' => user_access('administer growthcurve'));
+    if ($may_cache) {
+        // provide menus for users that are gc admins
+        $items[] = array(
+            'path' => 'admin/growthcurve',
+            'title' => t('gc reference curves'),
+            'callback' => 'growthcurve_admin',
+            'access' => user_access('administer growthcurve'));
 
-    $items[] = array(
-      'title' => t('growth curve'),
-      'path' => 'growthcurve',
-      'callback' => 'growthcurve_main',
-      'access' => user_access('access growthcurve'));
-    // Child related
-    $items[] = array(
-      'title' => t('list'),
-      'path' => 'growthcurve/list',
-      'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -10,
-      'access' => user_access('access growthcurve'));
-    $items[] = array(
-      'title' => t('add child'),
-      'path' => 'growthcurve/add',
-      'callback' => 'growthcurve_child_add',
-      'type' => MENU_LOCAL_TASK,
-      'access' => user_access('access growthcurve'));
-    $items[] = array(
-      'title' => t('details'),
-      'path' => 'growthcurve/edit',
-      'callback' => 'growthcurve_child_edit',
-      'type' => MENU_CALLBACK,
-      'access' => user_access('access growthcurve'));
-    $items[] = array(
-      'title' => t('measurements'),
-      'path' => 'growthcurve/measurements',
-      'callback' => 'growthcurve_measurements',
-      'type' => MENU_LOCAL_TASK,
-      'access' => user_access('access growthcurve'));
-    // Show a list of children of this user...
-    global $user;
-    $result = db_query( "SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
-    $first = TRUE;
-    while ($child = db_fetch_array($result)) {
-      // For measurements
-      $items[] = array(
-        'title' => $child['name'],
-        'path' => 'growthcurve/measurements/'.$child['child_id'],
-        'callback' => 'growthcurve_measurements',
-        'callback arguments' => array($child['child_id']),
-        'type' => ( $first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
-        'access' => user_access('access growthcurve'));
-      // For curves
-      $items[] = array(
-        'title' => $child['name'],
-        'path' => 'growthcurve/view/'.$child['child_id'],
-        'callback' => 'growthcurve_view_curve',
-        'callback arguments' => array($child['child_id']),
-        'type' => ( $first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
-        'access' => user_access('access growthcurve'));
-      $first = FALSE;
+        $items[] = array(
+            'title' => t('growth curve'),
+            'path' => 'growthcurve',
+            'callback' => 'growthcurve_main',
+            'access' => user_access('access growthcurve'));
+        // Child related
+        $items[] = array(
+            'title' => t('list'),
+            'path' => 'growthcurve/list',
+            'type' => MENU_DEFAULT_LOCAL_TASK,
+            'weight' => -10,
+            'access' => user_access('access growthcurve'));
+        $items[] = array(
+            'title' => t('add child'),
+            'path' => 'growthcurve/add',
+            'callback' => 'growthcurve_child_add',
+            'type' => MENU_LOCAL_TASK,
+            'access' => user_access('access growthcurve'));
+        $items[] = array(
+            'title' => t('details'),
+            'path' => 'growthcurve/edit',
+            'callback' => 'growthcurve_child_edit',
+            'type' => MENU_CALLBACK,
+            'access' => user_access('access growthcurve'));
+        $items[] = array(
+            'title' => t('measurements'),
+            'path' => 'growthcurve/measurements',
+            'callback' => 'growthcurve_measurements',
+            'type' => MENU_LOCAL_TASK,
+            'access' => user_access('access growthcurve'));
+        // Show a list of children of this user...
+        global $user;
+        $result = db_query("SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
+        $first = TRUE;
+        while ($child = db_fetch_array($result)) {
+            // For measurements
+            $items[] = array(
+                'title' => $child['name'],
+                'path' => 'growthcurve/measurements/' . $child['child_id'],
+                'callback' => 'growthcurve_measurements',
+                'callback arguments' => array($child['child_id']),
+                'type' => ($first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
+                'access' => user_access('access growthcurve'));
+            // For curves
+            $items[] = array(
+                'title' => $child['name'],
+                'path' => 'growthcurve/view/' . $child['child_id'],
+                'callback' => 'growthcurve_view_curve',
+                'callback arguments' => array($child['child_id']),
+                'type' => ($first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
+                'access' => user_access('access growthcurve'));
+            $first = FALSE;
+        }
+
+        $items[] = array(
+            'title' => t('remove child'),
+            'path' => 'growthcurve/remove',
+            'access' => user_access('access growthcurve'),
+            'callback' => 'growthcurve_child_remove',
+            'type' => MENU_CALLBACK);
+        // The curve... maybe for selected children in the table on page one?
+        $items[] = array(
+            'title' => t('view curve'),
+            'weight' => 5,
+            'path' => 'growthcurve/view',
+            'access' => user_access('access growthcurve'),
+            'callback' => 'growthcurve_view_curve',
+            'type' => MENU_LOCAL_TASK);
+        $items[] = array('path' => 'growthcurve/curve_weight', 'title' => t('weight curve'),
+            'callback' => 'growthcurve_view_curve_weight',
+            'access' => user_access('access growthcurve'),
+            'type' => MENU_CALLBACK);
+        $items[] = array('path' => 'growthcurve/curve_length', 'title' => t('length curve'),
+            'callback' => 'growthcurve_view_curve_length',
+            'access' => user_access('access growthcurve'),
+            'type' => MENU_CALLBACK);
+        $items[] = array(
+            'title' => t('help'),
+            'weight' => 49,
+            'path' => 'growthcurve/help',
+            'access' => user_access('access growthcurve'),
+            'callback' => 'growthcurve_help_info',
+            'type' => MENU_LOCAL_TASK);
+        // TODO: A menu option for debugging, should be removed in live-site
+        $items[] = array(
+            'title' => t('clear cache'),
+            'weight' => 50,
+            'path' => 'growthcurve/clear_cache',
+            'access' => user_access('access viewcurve'),
+            'callback' => 'growthcurve_clear_cache',
+            'type' => MENU_LOCAL_TASK);
+
+        // User-search helpers
+        $items[] = array(
+            'path' => 'admin/gcusermanager',
+            'title' => t('GC User Manager'),
+            'callback' => 'growthcurve_main_usermanager',
+            'access' => user_access('administer growthcurve'));
+
+        $items[] = array('path' => 'growthcurve/user_search', 'title' => t('User search'),
+            'callback' => 'growthcurve_user_search',
+            'access' => user_access(''),
+            'type' => MENU_CALLBACK);
+    } else if (strstr(drupal_get_path_alias($_GET['q']), 'admin/growthcurve')) {
+        // Configuration
+        $items[] = array(
+            'title' => t('list'),
+            'weight' => 1,
+            'path' => 'admin/growthcurve/list',
+            'access' => user_access('administer growthcurve'),
+            'callback' => 'growthcurve_admin',
+            'type' => MENU_LOCAL_TASK);
+        $items[] = array(
+            'title' => t('edit'),
+            'weight' => 2,
+            'path' => 'admin/growthcurve/edit',
+            'access' => user_access('administer growthcurve'),
+            'callback' => 'growthcurve_admin', //'growthcurve_admin_ref_edit',
+            'type' => MENU_LOCAL_TASK);
+        $items[] = array(
+            'title' => t('measurements'),
+            'weight' => 3,
+            'path' => 'admin/growthcurve/measurements',
+            'access' => user_access('administer growthcurve'),
+            'callback' => 'growthcurve_admin', //'growthcurve_admin_ref_measurements',
+            'type' => MENU_LOCAL_TASK);
+        $items[] = array(
+            'title' => t('view'),
+            'weight' => 4,
+            'path' => 'admin/growthcurve/view',
+            'access' => user_access('administer growthcurve'),
+            'callback' => 'growthcurve_admin', //'growthcurve_admin_ref_view',
+            'type' => MENU_LOCAL_TASK);
+        $result = db_query("SELECT * FROM {growthcurve_ref_curves} ORDER BY name");
+        $first = TRUE;
+        while ($ref_curve = db_fetch_array($result)) {
+            // For edit
+            $items[] = array(
+                'title' => $ref_curve['name'],
+                'path' => 'admin/growthcurve/edit/' . $ref_curve['curve_id'],
+                'callback' => 'growthcurve_admin',
+                'callback arguments' => array($ref_curve['curve_id']),
+                'type' => ($first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
+                'access' => user_access('growthcurve_admin'));
+            // For measurements
+            $items[] = array(
+                'title' => $ref_curve['name'],
+                'path' => 'admin/growthcurve/measurements/' . $ref_curve['curve_id'],
+                'callback' => 'growthcurve_admin',
+                'callback arguments' => array($ref_curve['curve_id']),
+                'type' => ($first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
+                'access' => user_access('growthcurve_admin'));
+            // For view
+            $items[] = array(
+                'title' => $ref_curve['name'],
+                'path' => 'admin/growthcurve/view/' . $ref_curve['curve_id'],
+                'callback' => 'growthcurve_admin',
+                'callback arguments' => array($ref_curve['curve_id']),
+                'type' => ($first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
+                'access' => user_access('growthcurve_admin'));
+            $first = FALSE;
+        }
+    } else {
+        // TODO: support this as well!!
     }
-
-    $items[] = array(
-      'title' => t('remove child'),
-      'path' => 'growthcurve/remove',
-      'access' => user_access('access growthcurve'),
-      'callback' => 'growthcurve_child_remove',
-      'type' => MENU_CALLBACK);
-    // The curve... maybe for selected children in the table on page one?
-    $items[] = array(
-      'title' => t('view curve'),
-      'weight' => 5,
-      'path' => 'growthcurve/view',
-      'access' => user_access('access growthcurve'),
-      'callback' => 'growthcurve_view_curve',
-      'type' => MENU_LOCAL_TASK);
-    $items[] = array('path' => 'growthcurve/curve_weight', 'title' => t('weight curve'),
-      'callback' => 'growthcurve_view_curve_weight',
-      'access' => user_access('access growthcurve'),
-      'type' => MENU_CALLBACK);
-    $items[] = array('path' => 'growthcurve/curve_length', 'title' => t('length curve'),
-      'callback' => 'growthcurve_view_curve_length',
-      'access' => user_access('access growthcurve'),
-      'type' => MENU_CALLBACK);
-    $items[] = array(
-      'title' => t('help'),
-      'weight' => 49,
-      'path' => 'growthcurve/help',
-      'access' => user_access('access growthcurve'),
-      'callback' => 'growthcurve_help_info',
-      'type' => MENU_LOCAL_TASK);
-    // TODO: A menu option for debugging, should be removed in live-site
-    $items[] = array(
-      'title' => t('clear cache'),
-      'weight' => 50,
-      'path' => 'growthcurve/clear_cache',
-      'access' => user_access('access viewcurve'),
-      'callback' => 'growthcurve_clear_cache',
-      'type' => MENU_LOCAL_TASK);
-
-    // User-search helpers
-    $items[] = array(
-      'path' => 'admin/gcusermanager',
-      'title' => t('GC User Manager'),
-      'callback' => 'growthcurve_main_usermanager',
-      'access' => user_access('administer growthcurve'));
-
-    $items[] = array('path' => 'growthcurve/user_search', 'title' => t('User search'),
-      'callback' => 'growthcurve_user_search',
-      'access' => user_access(''),
-      'type' => MENU_CALLBACK);
-  } else if (strstr(drupal_get_path_alias($_GET['q']), 'admin/growthcurve')) {
-    // Configuration
-    $items[] = array(
-      'title' => t('list'),
-      'weight' => 1,
-      'path' => 'admin/growthcurve/list',
-      'access' => user_access('administer growthcurve'),
-      'callback' => 'growthcurve_admin',
-      'type' => MENU_LOCAL_TASK);
-    $items[] = array(
-      'title' => t('edit'),
-      'weight' => 2,
-      'path' => 'admin/growthcurve/edit',
-      'access' => user_access('administer growthcurve'),
-      'callback' => 'growthcurve_admin', //'growthcurve_admin_ref_edit',
-      'type' => MENU_LOCAL_TASK);
-    $items[] = array(
-      'title' => t('measurements'),
-      'weight' => 3,
-      'path' => 'admin/growthcurve/measurements',
-      'access' => user_access('administer growthcurve'),
-      'callback' => 'growthcurve_admin', //'growthcurve_admin_ref_measurements',
-      'type' => MENU_LOCAL_TASK);
-    $items[] = array(
-      'title' => t('view'),
-      'weight' => 4,
-      'path' => 'admin/growthcurve/view',
-      'access' => user_access('administer growthcurve'),
-      'callback' => 'growthcurve_admin', //'growthcurve_admin_ref_view',
-      'type' => MENU_LOCAL_TASK);
-    $result = db_query( "SELECT * FROM {growthcurve_ref_curves} ORDER BY name");
-    $first = TRUE;
-    while ($ref_curve = db_fetch_array($result)) {
-      // For edit
-      $items[] = array(
-        'title' => $ref_curve['name'],
-        'path' => 'admin/growthcurve/edit/'.$ref_curve['curve_id'],
-        'callback' => 'growthcurve_admin',
-        'callback arguments' => array($ref_curve['curve_id']),
-        'type' => ( $first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
-        'access' => user_access('growthcurve_admin'));
-      // For measurements
-      $items[] = array(
-        'title' => $ref_curve['name'],
-        'path' => 'admin/growthcurve/measurements/'.$ref_curve['curve_id'],
-        'callback' => 'growthcurve_admin',
-        'callback arguments' => array($ref_curve['curve_id']),
-        'type' => ( $first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
-        'access' => user_access('growthcurve_admin'));
-      // For view
-      $items[] = array(
-        'title' => $ref_curve['name'],
-        'path' => 'admin/growthcurve/view/'.$ref_curve['curve_id'],
-        'callback' => 'growthcurve_admin',
-        'callback arguments' => array($ref_curve['curve_id']),
-        'type' => ( $first ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
-        'access' => user_access('growthcurve_admin'));
-      $first = FALSE;
-    }
-  } else {
-    // TODO: support this as well!!
-  }
-  return $items;
+    return $items;
 }
 
 /**
  * Valid permissions for this module
  * @return array An array of valid permissions for the growthcurve module
  */
-function growthcurve_perm() {
-  return array(
-    'access growthcurve',         // Just for mothers, keep track of their children
-    'dietist growthcurve',        // For those that can access other peoples graphs etc... to give advice
-    'administer growthcurve',     // Settings for the module (admin the ref-curves etc. etc.)
-    'statistics growthcurve'      // Get statistics on how all children in the database are growing
+function growthcurve_perm()
+{
+    return array(
+        'access growthcurve', // Just for mothers, keep track of their children
+        'dietist growthcurve', // For those that can access other peoples graphs etc... to give advice
+        'administer growthcurve', // Settings for the module (admin the ref-curves etc. etc.)
+        'statistics growthcurve' // Get statistics on how all children in the database are growing
     );
 } // function growthcurve_perm()
 
-DEFINE( "CHILDNOTFOUND", -1);
-DEFINE( "NOTYOURCHILD", -2);
+DEFINE("CHILDNOTFOUND", -1);
+DEFINE("NOTYOURCHILD", -2);
 
 /**
  * Check if the given child_id is of a child that is ours
@@ -354,42 +367,45 @@ DEFINE( "NOTYOURCHILD", -2);
  * @param strMsg The message to add to the Access-denied message to be more specific
  * @returns block HTML
  */
-function _CheckAccess( $child_id) {
-	// Check if this child is ours... (or if we are su???)
-	global $user;
-	$child = _get_child( $child_id);
-	if (!$child) {
-		return CHILDNOTFOUND;
-	}
+function _CheckAccess($child_id)
+{
+    // Check if this child is ours... (or if we are su???)
+    global $user;
+    $child = _get_child($child_id);
+    if (!$child) {
+        return CHILDNOTFOUND;
+    }
 
-	if (user_access("administer growthcurve")) {
-		return $child;
-	}
+    if (user_access("administer growthcurve")) {
+        return $child;
+    }
 
-	if (user_access("dietist growthcurve")) {
-		// TODO: add some special check here
-		// eg. Did the parent of this child ask advice to this user?
-		return $child;
-	}
+    if (user_access("dietist growthcurve")) {
+        // TODO: add some special check here
+        // eg. Did the parent of this child ask advice to this user?
+        return $child;
+    }
 
-	if ( strcmp( $child->uid, $user->uid) != 0)
-		return NOTYOURCHILD;
+    if (strcmp($child->uid, $user->uid) != 0)
+        return NOTYOURCHILD;
 
-	return $child;
+    return $child;
 }
 
 /**
  * Default response when the Child is not found
  */
-function _ErrorChildNotFound() {
-  print theme('page', t('No child found with the given number') . '<br>' . _add_child_list_link());
+function _ErrorChildNotFound()
+{
+    print theme('page', t('No child found with the given number') . '<br>' . _add_child_list_link());
 }
 
 /**
  * Default response when the Child is not yours
  */
-function _ErrorNotYourChild() {
-  print theme( 'page', message_access().'<hr>'.t('This is not one of your children'));
+function _ErrorNotYourChild()
+{
+    print theme('page', message_access() . '<hr>' . t('This is not one of your children'));
 }
 
 /**
@@ -398,200 +414,208 @@ function _ErrorNotYourChild() {
  * @param delta offset
  * @returns block HTML
  */
-function growthcurve_block($op='list', $delta=0) {
-  // listing of blocks, such as on the admin/block page
-  if ($op == "list") {
-    $block[0]["info"] = t("Growth curve");
-    return $block;
-  } else {
-  	// our block content
-    // content variable that will be returned for display
-    $block_content = '';
+function growthcurve_block($op = 'list', $delta = 0)
+{
+    // listing of blocks, such as on the admin/block page
+    if ($op == "list") {
+        $block[0]["info"] = t("Growth curve");
+        return $block;
+    } else {
+        // our block content
+        // content variable that will be returned for display
+        $block_content = '';
 
-    // set up the block
-    $block['subject'] = t('Growth curve');
+        // set up the block
+        $block['subject'] = t('Growth curve');
 
-	$block['content'] = '';
-    // how many children does this user have?
-	global $user;
-	if (0 == $user->uid) {
-		$block['content'] .= t('Click %here to register<br>', array("%here" => l(t("here"), "user/register", array("title" => t("Register.")))));
-	} else {
-		$res = db_fetch_array( db_query( "SELECT COUNT(child_id) cnt FROM {growthcurve_children} WHERE uid = %d", $user->uid));
-		if ($res['cnt'] > 0) {
-			$block['content'] .= t('Click %here to view your children<br>', array("%here" => l(t("here"), "growthcurve", array("title" => t("View your children.")))));
-		} else {
-			$block['content'] .= t('Click %here to start using Growth curve<br>', array("%here" => l(t("here"), "growthcurve", array("title" => t("Start using Growth curve")))));
-		}
-	}
+        $block['content'] = '';
+        // how many children does this user have?
+        global $user;
+        if (0 == $user->uid) {
+            $block['content'] .= t('Click %here to register<br>', array("%here" => l(t("here"), "user/register", array("title" => t("Register.")))));
+        } else {
+            $res = db_fetch_array(db_query("SELECT COUNT(child_id) cnt FROM {growthcurve_children} WHERE uid = %d", $user->uid));
+            if ($res['cnt'] > 0) {
+                $block['content'] .= t('Click %here to view your children<br>', array("%here" => l(t("here"), "growthcurve", array("title" => t("View your children.")))));
+            } else {
+                $block['content'] .= t('Click %here to start using Growth curve<br>', array("%here" => l(t("here"), "growthcurve", array("title" => t("Start using Growth curve")))));
+            }
+        }
 
-    $block['content'] .= "<hr>\n";
+        $block['content'] .= "<hr>\n";
 
-    // Count number of children
-    // DONE: count the number or parents that have registered to keep track of their childrens growing
-    $res = db_fetch_array( db_query( "SELECT COUNT(DISTINCT(uid)) cnt FROM {growthcurve_children}"));
-    $block['content'] .= t('%cnt parents already signed up', array('%cnt' => $res['cnt']))."\n";
-    // DONE: count the number of children that are kept track of (+ava per parent ;-) )
-    $res = db_fetch_array( db_query( "SELECT COUNT(child_id) cnt FROM {growthcurve_children}"));
-    $block['content'] .= t('together they have %cnt children', array('%cnt' => $res['cnt']))."\n";
+        // Count number of children
+        // DONE: count the number or parents that have registered to keep track of their childrens growing
+        $res = db_fetch_array(db_query("SELECT COUNT(DISTINCT(uid)) cnt FROM {growthcurve_children}"));
+        $block['content'] .= t('%cnt parents already signed up', array('%cnt' => $res['cnt'])) . "\n";
+        // DONE: count the number of children that are kept track of (+ava per parent ;-) )
+        $res = db_fetch_array(db_query("SELECT COUNT(child_id) cnt FROM {growthcurve_children}"));
+        $block['content'] .= t('together they have %cnt children', array('%cnt' => $res['cnt'])) . "\n";
 
-    return $block;
-  }
+        return $block;
+    }
 } // end growthcurve_block
 
 /**
  *
  */
-function growthcurve_ref_curve_list() {
-  $result = db_query( "SELECT * FROM {growthcurve_ref_curves} ORDER BY name", $user->uid);
-  $rows = array();
-  while ($ref_curve = db_fetch_array($result)) {
-    $rows[] = array(array('data' => $ref_curve['name'], 'class' => 'block'),
-		  array('data' => $ref_curve['gender'] == 'f' ? 'female' : 'male', 'class' => 'block'),
-      $ref_curve['details'],
-      l(t('curve'), 'admin/growthcurve/view/'. $ref_curve['curve_id']),
-      l(t('edit'), 'admin/growthcurve/edit/'. $ref_curve['curve_id']),
-      l(t('measurements'), 'admin/growthcurve/measurements/'. $ref_curve['curve_id'])
-      //,l(t('remove'), 'admin/growthcurve/remove/'. $ref_curve['curve_id'])
-      );
-  }
-  if ( sizeof( $rows)) {
-    // Create the header
-    $output = t( "These are the reference curves you have in your system.")."<br>\n";
-    $header = array(t('Name'), t('Gender'), t('Details'));
-    $header[] = array('data' => t('Operations'), 'colspan' => 4);
-    $output .= theme('table', $header, $rows, array('id' => 'ref_curves'));
-  } else {
-    $output = t( "You do not have any reference curves in your system. That is odd. This should not happen after a normal setup. Did you delete all of them???")."\n";
-  }
-  //$content .= '<p>' . _add_ref_curve_link() . '</p>';
-  return $output;
+function growthcurve_ref_curve_list()
+{
+    $result = db_query("SELECT * FROM {growthcurve_ref_curves} ORDER BY name", $user->uid);
+    $rows = array();
+    while ($ref_curve = db_fetch_array($result)) {
+        $rows[] = array(array('data' => $ref_curve['name'], 'class' => 'block'),
+            array('data' => $ref_curve['gender'] == 'f' ? 'female' : 'male', 'class' => 'block'),
+            $ref_curve['details'],
+            l(t('curve'), 'admin/growthcurve/view/' . $ref_curve['curve_id']),
+            l(t('edit'), 'admin/growthcurve/edit/' . $ref_curve['curve_id']),
+            l(t('measurements'), 'admin/growthcurve/measurements/' . $ref_curve['curve_id'])
+            //,l(t('remove'), 'admin/growthcurve/remove/'. $ref_curve['curve_id'])
+        );
+    }
+    if (sizeof($rows)) {
+        // Create the header
+        $output = t("These are the reference curves you have in your system.") . "<br>\n";
+        $header = array(t('Name'), t('Gender'), t('Details'));
+        $header[] = array('data' => t('Operations'), 'colspan' => 4);
+        $output .= theme('table', $header, $rows, array('id' => 'ref_curves'));
+    } else {
+        $output = t("You do not have any reference curves in your system. That is odd. This should not happen after a normal setup. Did you delete all of them???") . "\n";
+    }
+    //$content .= '<p>' . _add_ref_curve_link() . '</p>';
+    return $output;
 }
 
 /**
  *
  */
-function growthcurve_admin() {
-  // only administrators can access this module
-  if (!user_access("administer growthcurve")) {
-  	print theme('page', 'growthcurve_admin access error:<hr>'.message_access());
-    return;
-  }
-  // What should be do?
-  $op = $_POST['op'];
-  $edit = $_POST['edit'];
+function growthcurve_admin()
+{
+    // only administrators can access this module
+    if (!user_access("administer growthcurve")) {
+        print theme('page', 'growthcurve_admin access error:<hr>' . message_access());
+        return;
+    }
+    // What should be do?
+    $op = $_POST['op'];
+    $edit = $_POST['edit'];
 
-  if (empty($op)) {
-    $op = arg(2);
-  }
+    if (empty($op)) {
+        $op = arg(2);
+    }
 
-  $output = '';
-  // Debug:
-  //$output = 'growthcurve_admin: 0:'.arg(0).', 1:'.arg(1).', 2:'.arg(2).', 3:'.arg(3).'. And $op: '.$op.'<hr>';
-  //$output .= _vds($_POST);
-  switch ($op) {
-    // Edit
-    case t('Save reference curve'):
-    case 'edit':
-      $output .= growthcurve_admin_ref_edit(arg(3));
-      break;
-    // Measurements
-    case t('Save and add more'):
-    case t('Undelete'):
-    case 'measurements':
-      $output .= growthcurve_admin_ref_measurements(arg(3));
-      break;
-    case 'view':
-      $output .= growthcurve_admin_ref_view(arg(3));
-      break;
-    case 'list':
-    default:
-      $output .= growthcurve_ref_curve_list();
-  }
-  print theme('page', $output);
+    $output = '';
+    // Debug:
+    //$output = 'growthcurve_admin: 0:'.arg(0).', 1:'.arg(1).', 2:'.arg(2).', 3:'.arg(3).'. And $op: '.$op.'<hr>';
+    //$output .= _vds($_POST);
+    switch ($op) {
+        // Edit
+        case t('Save reference curve'):
+        case 'edit':
+            $output .= growthcurve_admin_ref_edit(arg(3));
+            break;
+        // Measurements
+        case t('Save and add more'):
+        case t('Undelete'):
+        case 'measurements':
+            $output .= growthcurve_admin_ref_measurements(arg(3));
+            break;
+        case 'view':
+            $output .= growthcurve_admin_ref_view(arg(3));
+            break;
+        case 'list':
+        default:
+            $output .= growthcurve_ref_curve_list();
+    }
+    print theme('page', $output);
 }
 
 /**
  * Generate HTML for the growthcurve configuration
  * @returns HTML for configuration-screen
  */
-function growthcurve_settings() {
-  // only administrators can access this module
-  if (!user_access("administer growthcurve")) {
-    return message_access();
-  }
-  $output = growthcurve_ref_curve_list();
+function growthcurve_settings()
+{
+    // only administrators can access this module
+    if (!user_access("administer growthcurve")) {
+        return message_access();
+    }
+    $output = growthcurve_ref_curve_list();
 
-	$output .= "<hr>\n";
-  return $output;
+    $output .= "<hr>\n";
+    return $output;
 }
 
 /**
  *
  */
-function get_ref_curve($curve_id) {
-  return db_fetch_object( db_query( "SELECT * FROM {growthcurve_ref_curves} WHERE curve_id = ".$curve_id));
-}
-
-/**
- * 
- */
-function _GetGraphHint() {
-	return '<div id="graph_size_hint" style="float: right; font-size:xx-small;">'.t("Click on the graph to get a larger version").'</div>';
+function get_ref_curve($curve_id)
+{
+    return db_fetch_object(db_query("SELECT * FROM {growthcurve_ref_curves} WHERE curve_id = " . $curve_id));
 }
 
 /**
  *
  */
-function growthcurve_admin_ref_view($ref_id = '') {
-	if ($ref_id == '') {
-		$ref_id = _get_first_ref_curve();
-	}
-	
-  $ref_cruve = get_ref_curve($ref_id);
-
-	// TODO: Show the ref-curve info
-	$output = "Reference curve: ".$ref_cruve->name."<br>\n";
-	
-	$ref_cruve = _select_ref_curve( $ref_id);
-	if ( $ref_cruve->nr_of_weight_lines > 0) {
-		$output .= "The weights<br>\n";
-		$graphUrl = url('growthcurve/curve_weight/reference/'.$ref_cruve->curve_id);
-		$output .= '<a href="'.$graphUrl.'/1" title="'.t("Click to get a larger version").'">';
-		$output .= '<img src="'.$graphUrl.'" alt="Your weight reference curve" title="Your weight reference curve">';
-		$output .= '</a>';
-		$output .= _GetGraphHint();
-		$output .= "\n<hr>\n";
-	}
-	if ( $ref_cruve->nr_of_length_lines > 0) {
-		$output .= "The lengths<br>\n";
-		$graphUrl = url('growthcurve/curve_length/reference/'.$ref_cruve->curve_id);
-		$output .= '<a href="'.$graphUrl.'/1" title="'.t("Click to get a larger version").'">';
-		$output .= '<img src="'.$graphUrl.'" alt="Your length reference curve" title="Your length reference curve">';
-		$output .= '</a>';
-		$output .= _GetGraphHint();
-	}
-	$output .= "\n";
-	
-	return $output;
+function _GetGraphHint()
+{
+    return '<div id="graph_size_hint" style="float: right; font-size:xx-small;">' . t("Click on the graph to get a larger version") . '</div>';
 }
 
-function growthcurve_ref_curve_form($ref_curve) {
-  $output = form_hidden('ref_curve_id', $ref_curve->curve_id);
-  $output .= form_textfield( t('Reference curve name'), 'name', $ref_curve->name, 50, 64, t('The name of the reference to add.'), NULL, TRUE);
-  $output .= form_radios( t('Gender'), 'gender', $ref_curve->gender, array( 'm' => t('Male'), 'f' => t('Female')), t('The gender this reference curve is for'), TRUE);
-  $output .= form_select(t("Number of weight lines in reference curve"), "nr_of_weight_lines",
-                         $ref_curve->nr_of_weight_lines,
-                         drupal_map_assoc(array(0, 1, 3, 5, 7)),
-                         t("The number of weight lines in one reference curve."));
-  $output .= form_select(t("Number of length lines in reference curve"), "nr_of_length_lines",
-                         $ref_curve->nr_of_length_lines,
-                         drupal_map_assoc(array(0, 1, 3, 5, 7)),
-                         t("The number of length lines in one reference curve."));
-  // TODO: add ethnic background as a setting so we can determine what ref-curve to use
-  $output .= form_textarea( t('Details'), 'details', $ref_curve->details, 70, 10, t('Details about this reference curve (eg. when to use it).'));
+/**
+ *
+ */
+function growthcurve_admin_ref_view($ref_id = '')
+{
+    if ($ref_id == '') {
+        $ref_id = _get_first_ref_curve();
+    }
 
-  return $output;
+    $ref_cruve = get_ref_curve($ref_id);
+
+    // TODO: Show the ref-curve info
+    $output = "Reference curve: " . $ref_cruve->name . "<br>\n";
+
+    $ref_cruve = _select_ref_curve($ref_id);
+    if ($ref_cruve->nr_of_weight_lines > 0) {
+        $output .= "The weights<br>\n";
+        $graphUrl = url('growthcurve/curve_weight/reference/' . $ref_cruve->curve_id);
+        $output .= '<a href="' . $graphUrl . '/1" title="' . t("Click to get a larger version") . '">';
+        $output .= '<img src="' . $graphUrl . '" alt="Your weight reference curve" title="Your weight reference curve">';
+        $output .= '</a>';
+        $output .= _GetGraphHint();
+        $output .= "\n<hr>\n";
+    }
+    if ($ref_cruve->nr_of_length_lines > 0) {
+        $output .= "The lengths<br>\n";
+        $graphUrl = url('growthcurve/curve_length/reference/' . $ref_cruve->curve_id);
+        $output .= '<a href="' . $graphUrl . '/1" title="' . t("Click to get a larger version") . '">';
+        $output .= '<img src="' . $graphUrl . '" alt="Your length reference curve" title="Your length reference curve">';
+        $output .= '</a>';
+        $output .= _GetGraphHint();
+    }
+    $output .= "\n";
+
+    return $output;
+}
+
+function growthcurve_ref_curve_form($ref_curve)
+{
+    $output = form_hidden('ref_curve_id', $ref_curve->curve_id);
+    $output .= form_textfield(t('Reference curve name'), 'name', $ref_curve->name, 50, 64, t('The name of the reference to add.'), NULL, TRUE);
+    $output .= form_radios(t('Gender'), 'gender', $ref_curve->gender, array('m' => t('Male'), 'f' => t('Female')), t('The gender this reference curve is for'), TRUE);
+    $output .= form_select(t("Number of weight lines in reference curve"), "nr_of_weight_lines",
+        $ref_curve->nr_of_weight_lines,
+        drupal_map_assoc(array(0, 1, 3, 5, 7)),
+        t("The number of weight lines in one reference curve."));
+    $output .= form_select(t("Number of length lines in reference curve"), "nr_of_length_lines",
+        $ref_curve->nr_of_length_lines,
+        drupal_map_assoc(array(0, 1, 3, 5, 7)),
+        t("The number of length lines in one reference curve."));
+    // TODO: add ethnic background as a setting so we can determine what ref-curve to use
+    $output .= form_textarea(t('Details'), 'details', $ref_curve->details, 70, 10, t('Details about this reference curve (eg. when to use it).'));
+
+    return $output;
 }
 
 
@@ -600,285 +624,293 @@ function growthcurve_ref_curve_form($ref_curve) {
  */
 function growthcurve_ref_curve_validate($ref_curve)
 {
-  // Convert the node to an object, if necessary.
-  $ref_curve = array2object($ref_curve);
+    // Convert the node to an object, if necessary.
+    $ref_curve = array2object($ref_curve);
 
-  // Validate the name field.
-  if (isset($ref_curve->name)) {
-    if (trim($ref_curve->name) == '') {
-      form_set_error('name', t('You have to specify a name.'));
+    // Validate the name field.
+    if (isset($ref_curve->name)) {
+        if (trim($ref_curve->name) == '') {
+            form_set_error('name', t('You have to specify a name.'));
+        }
     }
-  }
 
-  // Validate the gender field.
-  if (isset($ref_curve->gender)) {
-    if ( (trim($ref_curve->gender) != 'm') && (trim($ref_curve->gender) != 'f')) {
-      form_set_error('name', t('You have to specify a gender.'));
+    // Validate the gender field.
+    if (isset($ref_curve->gender)) {
+        if ((trim($ref_curve->gender) != 'm') && (trim($ref_curve->gender) != 'f')) {
+            form_set_error('name', t('You have to specify a gender.'));
+        }
     }
-  }
 
-	$ref_curve->validated = TRUE;
-	return $ref_curve;
+    $ref_curve->validated = TRUE;
+    return $ref_curve;
 }
 
 /**
  *
  */
-function growthcurve_ref_curve_save($ref_curve, $ref_id) {
-  if (isset($ref_id)) {
-    db_query("UPDATE {growthcurve_ref_curves} SET name = '%s', nr_of_weight_lines = '%s', nr_of_length_lines = '%s', gender = '%s', details = '%s' WHERE curve_id = %d", $ref_curve->name, $ref_curve->nr_of_weight_lines, $ref_curve->nr_of_length_lines, $ref_curve->gender, $ref_curve->details, $ref_id);
-    //drupal_set_message( t('Reference curve %name(%id) updated.', array( '%name' => $ref_curve->name, '%id' => $ref_id)));
-  }
-  else {
-    global $user;
-    db_query("INSERT INTO {growthcurve_ref_curves} (name, nr_of_weight_lines, nr_of_length_lines, gender, details) VALUES  ('%s', '%s', '%s', '%s')", $ref_curve->name, $ref_curve->nr_of_weight_lines, $ref_curve->nr_of_length_lines, $ref_curve->gender, $ref_curve->details);
-    drupal_set_message( t('Reference curve %name added.', array( '%name' => $ref_curve->name)));
-  }
+function growthcurve_ref_curve_save($ref_curve, $ref_id)
+{
+    if (isset($ref_id)) {
+        db_query("UPDATE {growthcurve_ref_curves} SET name = '%s', nr_of_weight_lines = '%s', nr_of_length_lines = '%s', gender = '%s', details = '%s' WHERE curve_id = %d", $ref_curve->name, $ref_curve->nr_of_weight_lines, $ref_curve->nr_of_length_lines, $ref_curve->gender, $ref_curve->details, $ref_id);
+        //drupal_set_message( t('Reference curve %name(%id) updated.', array( '%name' => $ref_curve->name, '%id' => $ref_id)));
+    }
+    else {
+        global $user;
+        db_query("INSERT INTO {growthcurve_ref_curves} (name, nr_of_weight_lines, nr_of_length_lines, gender, details) VALUES  ('%s', '%s', '%s', '%s')", $ref_curve->name, $ref_curve->nr_of_weight_lines, $ref_curve->nr_of_length_lines, $ref_curve->gender, $ref_curve->details);
+        drupal_set_message(t('Reference curve %name added.', array('%name' => $ref_curve->name)));
+    }
 }
 
 /**
  *
  */
-function growthcurve_admin_ref_edit($ref_id = '') {
-  $ref_curve = $_POST['edit'];
-  $op = $_POST['op'];
+function growthcurve_admin_ref_edit($ref_id = '')
+{
+    $ref_curve = $_POST['edit'];
+    $op = $_POST['op'];
 
-	if ($ref_id == '') {
-		$ref_id = _get_first_ref_curve();
-	}
+    if ($ref_id == '') {
+        $ref_id = _get_first_ref_curve();
+    }
 
-  switch ($op) {
-    case t('Save reference curve'):
-      $ref_curve = growthcurve_ref_curve_validate( $ref_curve);
-      if (!form_get_errors()) {
-        growthcurve_ref_curve_save( $ref_curve, $ref_id);
-        drupal_set_message( t('The details of reference curve %name have been saved.', array( '%name' => $ref_curve->name)));
-        menu_rebuild();
-        drupal_goto( 'admin/growthcurve');
-      }
+    switch ($op) {
+        case t('Save reference curve'):
+            $ref_curve = growthcurve_ref_curve_validate($ref_curve);
+            if (!form_get_errors()) {
+                growthcurve_ref_curve_save($ref_curve, $ref_id);
+                drupal_set_message(t('The details of reference curve %name have been saved.', array('%name' => $ref_curve->name)));
+                menu_rebuild();
+                drupal_goto('admin/growthcurve');
+            }
 
-    default:
-      $ref_curve = get_ref_curve($ref_id);
-  }
+        default:
+            $ref_curve = get_ref_curve($ref_id);
+    }
 
-  $form = growthcurve_ref_curve_form( $ref_curve);
-  $form .= form_submit(t('Save reference curve'));
-  $output .= form($form);
+    $form = growthcurve_ref_curve_form($ref_curve);
+    $form .= form_submit(t('Save reference curve'));
+    $output .= form($form);
 
-	return $output;
+    return $output;
 }
 
 /*
  *
  */
-function _get_field_names() {
-  global $ref_curves_groups;
-  $fieldnames = '';
-  $first = true;
-  // Weight
-  for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-    if (!$first) {
-      $fieldnames .= ', ';
-    } else {
-      $first = false;
+function _get_field_names()
+{
+    global $ref_curves_groups;
+    $fieldnames = '';
+    $first = true;
+    // Weight
+    for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+        if (!$first) {
+            $fieldnames .= ', ';
+        } else {
+            $first = false;
+        }
+
+        if ($grp < 0) {
+            $field_name = 'weight_m' . abs($grp);
+        } else {
+            $field_name = 'weight_' . $grp;
+        }
+        $fieldnames .= $field_name;
     }
-    
-    if ($grp < 0) {
-      $field_name = 'weight_m'.abs($grp);
-    } else {
-      $field_name = 'weight_'.$grp;
+    // Length
+    for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+        if (!$first) {
+            $fieldnames .= ', ';
+        } else {
+            $first = false;
+        }
+
+        if ($grp < 0) {
+            $field_name = 'length_m' . abs($grp);
+        } else {
+            $field_name = 'length_' . $grp;
+        }
+        $fieldnames .= $field_name;
     }
-    $fieldnames .= $field_name;
-  }
-  // Length
-  for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-    if (!$first) {
-      $fieldnames .= ', ';
-    } else {
-      $first = false;
-    }
-    
-    if ($grp < 0) {
-      $field_name = 'length_m'.abs($grp);
-    } else {
-      $field_name = 'length_'.$grp;
-    }
-    $fieldnames .= $field_name;
-  }
-  return $fieldnames;
+    return $fieldnames;
 }
 
 /**
  *
  */
-function growthcurve_admin_ref_measurements($ref_id = '') {
-	// Measurements of the ref-curve info
-	if ($ref_id == '') {
-		$ref_id = _get_first_ref_curve();
-	}
-	
-  $ref_cruve = get_ref_curve($ref_id);
-  global $ref_curves_groups;
-	// TODO: Take the highest of the two for now
-  $ref_curves_groups = floor( ( $ref_cruve->nr_of_weight_lines > $ref_cruve->nr_of_length_lines ? $ref_cruve->nr_of_weight_lines : $ref_cruve->nr_of_length_lines) / 2);
-
-	$header_msg = "Measurements of the refcurve: ".$ref_cruve->name;
-
-  $the_measurements = $_POST['edit'];
-  $op = $_POST['op'];
-  if ( t('Save and add more') == $op) {
-    // validate fields
-    $i = 0; $all_ok = TRUE;
-    while ( $the_measurements['date_'.$i]) {
-      $all_ok = $all_ok && _validate_measurement( $the_measurements, $i, true);
-      $i++;
+function growthcurve_admin_ref_measurements($ref_id = '')
+{
+    // Measurements of the ref-curve info
+    if ($ref_id == '') {
+        $ref_id = _get_first_ref_curve();
     }
-    // When error found, return a form with all posted data...
-    if ( ! $all_ok) {
-      // Send the data back so the user can change it
-      $i = 0;
-      $rows = array();
-      while ( $the_measurements['date_'.$i]) {
-        $measurement['measurement_id']  = $the_measurements['measurement_id_'.$i];
-        $measurement['moment_str'] = $the_measurements['date_'.$i];
-        // Weights
-        for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-          if ($grp < 0) {
-            $measurement['weight_str_m'.abs($grp)] = $the_measurements['weight_m'.abs($grp)];
-          } else {
-            $measurement['weight_str_'.$grp] = $the_measurements['weight_'.$grp];
-          }
-        }
-        // Lengths
-        for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-          if ($grp < 0) {
-            $measurement['length_str_m'.abs($grp)] = $the_measurements['length_m'.abs($grp)];
-          } else {
-            $measurement['length_str_'.$grp] = $the_measurements['length_'.$grp];
-          }
-        }
-        // Comment
-        $measurement['comments']   = $the_measurements['comment_'.$i];
-        $rows[] = _measurement_row( $measurement, $i, true);
-        $i++;
-      }
-      return _weight_table( $header_msg, $rows, NULL, true);
-    } else {
-      // Save the details
-      $i = 0; $nr_ins = 0; $nr_upd = 0; $nr_del = 0;
-      while ( $the_measurements['date_'.$i]) {
-        // See what needs to be done
-        global $user;
-        if ( $the_measurements['measurement_id_'.$i]) {
-          // Update or delete
-          if ( 'del' == $the_measurements['del_weight_'.$i]) {
-            //drupal_set_message( 'Delete '.$the_measurements['measurement_id_'.$i]);
-            // TODO: add transaction-block here... :-(
-            // TODO: add support for the dual tables here (and for all those other actions of these two tables)
-            db_query( "DELETE FROM {growthcurve_ref_curves_measurements} WHERE curve_id = %d AND measurement_id = %d", $ref_id, $the_measurements['measurement_id_'.$i]);
-            $nr_del++;
-          } else {
-            //drupal_set_message( 'Update '.$the_measurements['measurement_id_'.$i]);
-            $fields = '';
-            $first = true;
-            // Weight
-            for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-              if (!$first) {
-                $fields .= ', ';
-              } else {
-                $first = false;
-              }
 
-              if ($grp < 0) {
-                $field_name = 'weight_m'.abs($grp);
-              } else {
-                $field_name = 'weight_'.$grp;
-              }
-              $fields .= $field_name . ' = ';
-              $fields .= is_numeric( $the_measurements[$field_name.'_'.$i]) ? $the_measurements[$field_name.'_'.$i] : 'NULL';
-            }
-            // Length
-            for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-              $fields .= ', ';
+    $ref_cruve = get_ref_curve($ref_id);
+    global $ref_curves_groups;
+    // TODO: Take the highest of the two for now
+    $ref_curves_groups = floor(($ref_cruve->nr_of_weight_lines > $ref_cruve->nr_of_length_lines ? $ref_cruve->nr_of_weight_lines : $ref_cruve->nr_of_length_lines) / 2);
 
-              if ($grp < 0) {
-                $field_name = 'length_m'.abs($grp);
-              } else {
-                $field_name = 'length_'.$grp;
-              }
-              $fields .= $field_name . ' = ';
-              $fields .= is_numeric( $the_measurements[$field_name.'_'.$i]) ? $the_measurements[$field_name.'_'.$i] : 'NULL';
+    $header_msg = "Measurements of the refcurve: " . $ref_cruve->name;
+
+    $the_measurements = $_POST['edit'];
+    $op = $_POST['op'];
+    if (t('Save and add more') == $op) {
+        // validate fields
+        $i = 0;
+        $all_ok = TRUE;
+        while ($the_measurements['date_' . $i]) {
+            $all_ok = $all_ok && _validate_measurement($the_measurements, $i, true);
+            $i++;
+        }
+        // When error found, return a form with all posted data...
+        if (!$all_ok) {
+            // Send the data back so the user can change it
+            $i = 0;
+            $rows = array();
+            while ($the_measurements['date_' . $i]) {
+                $measurement['measurement_id'] = $the_measurements['measurement_id_' . $i];
+                $measurement['moment_str'] = $the_measurements['date_' . $i];
+                // Weights
+                for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+                    if ($grp < 0) {
+                        $measurement['weight_str_m' . abs($grp)] = $the_measurements['weight_m' . abs($grp)];
+                    } else {
+                        $measurement['weight_str_' . $grp] = $the_measurements['weight_' . $grp];
+                    }
+                }
+                // Lengths
+                for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+                    if ($grp < 0) {
+                        $measurement['length_str_m' . abs($grp)] = $the_measurements['length_m' . abs($grp)];
+                    } else {
+                        $measurement['length_str_' . $grp] = $the_measurements['length_' . $grp];
+                    }
+                }
+                // Comment
+                $measurement['comments'] = $the_measurements['comment_' . $i];
+                $rows[] = _measurement_row($measurement, $i, true);
+                $i++;
             }
-            db_query( "UPDATE {growthcurve_ref_curves_measurements} SET moment = '%s', $fields, comments = '%s' WHERE curve_id = %d AND measurement_id = %d",
-                      $the_measurements['conv_date_'.$i],
-                      $the_measurements['comment_'.$i],
-                      $ref_id,
-                      $the_measurements['measurement_id_'.$i]);
-            $nr_upd++;
-          }
+            return _weight_table($header_msg, $rows, NULL, true);
         } else {
-          // Insert
-          //drupal_set_message( 'Insert new');
-          $fieldnames = '';
-          $fieldvalues = '';
-          $first = true;
-          // Weight
-          for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-            if (!$first) {
-              $fieldnames .= ', ';
-              $fieldvalues .= ', ';
-            } else {
-              $first = false;
-            }
+            // Save the details
+            $i = 0;
+            $nr_ins = 0;
+            $nr_upd = 0;
+            $nr_del = 0;
+            while ($the_measurements['date_' . $i]) {
+                // See what needs to be done
+                global $user;
+                if ($the_measurements['measurement_id_' . $i]) {
+                    // Update or delete
+                    if ('del' == $the_measurements['del_weight_' . $i]) {
+                        //drupal_set_message( 'Delete '.$the_measurements['measurement_id_'.$i]);
+                        // TODO: add transaction-block here... :-(
+                        // TODO: add support for the dual tables here (and for all those other actions of these two tables)
+                        db_query("DELETE FROM {growthcurve_ref_curves_measurements} WHERE curve_id = %d AND measurement_id = %d", $ref_id, $the_measurements['measurement_id_' . $i]);
+                        $nr_del++;
+                    } else {
+                        //drupal_set_message( 'Update '.$the_measurements['measurement_id_'.$i]);
+                        $fields = '';
+                        $first = true;
+                        // Weight
+                        for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+                            if (!$first) {
+                                $fields .= ', ';
+                            } else {
+                                $first = false;
+                            }
 
-            if ($grp < 0) {
-              $field_name = 'weight_m'.abs($grp);
-            } else {
-              $field_name = 'weight_'.$grp;
-            }
-            $fieldnames .= $field_name;
-            $fieldvalues .= is_numeric( $the_measurements[$field_name.'_'.$i]) ? $the_measurements[$field_name.'_'.$i] : 'NULL';
-          }
-          // Length
-          for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-            if (!$first) {
-              $fieldnames .= ', ';
-              $fieldvalues .= ', ';
-            } else {
-              $first = false;
-            }
+                            if ($grp < 0) {
+                                $field_name = 'weight_m' . abs($grp);
+                            } else {
+                                $field_name = 'weight_' . $grp;
+                            }
+                            $fields .= $field_name . ' = ';
+                            $fields .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
+                        }
+                        // Length
+                        for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+                            $fields .= ', ';
 
-            if ($grp < 0) {
-              $field_name = 'length_m'.abs($grp);
-            } else {
-              $field_name = 'length_'.$grp;
+                            if ($grp < 0) {
+                                $field_name = 'length_m' . abs($grp);
+                            } else {
+                                $field_name = 'length_' . $grp;
+                            }
+                            $fields .= $field_name . ' = ';
+                            $fields .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
+                        }
+                        db_query("UPDATE {growthcurve_ref_curves_measurements} SET moment = '%s', $fields, comments = '%s' WHERE curve_id = %d AND measurement_id = %d",
+                            $the_measurements['conv_date_' . $i],
+                            $the_measurements['comment_' . $i],
+                            $ref_id,
+                            $the_measurements['measurement_id_' . $i]);
+                        $nr_upd++;
+                    }
+                } else {
+                    // Insert
+                    //drupal_set_message( 'Insert new');
+                    $fieldnames = '';
+                    $fieldvalues = '';
+                    $first = true;
+                    // Weight
+                    for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+                        if (!$first) {
+                            $fieldnames .= ', ';
+                            $fieldvalues .= ', ';
+                        } else {
+                            $first = false;
+                        }
+
+                        if ($grp < 0) {
+                            $field_name = 'weight_m' . abs($grp);
+                        } else {
+                            $field_name = 'weight_' . $grp;
+                        }
+                        $fieldnames .= $field_name;
+                        $fieldvalues .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
+                    }
+                    // Length
+                    for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+                        if (!$first) {
+                            $fieldnames .= ', ';
+                            $fieldvalues .= ', ';
+                        } else {
+                            $first = false;
+                        }
+
+                        if ($grp < 0) {
+                            $field_name = 'length_m' . abs($grp);
+                        } else {
+                            $field_name = 'length_' . $grp;
+                        }
+                        $fieldnames .= $field_name;
+                        $fieldvalues .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
+                    }
+                    db_query("INSERT INTO {growthcurve_ref_curves_measurements} (curve_id, moment, $fieldnames, comments) VALUES ( %d, '%s', $fieldvalues, '%s')",
+                        $ref_id,
+                        $the_measurements['conv_date_' . $i],
+                        $the_measurements['comment_' . $i]);
+                    $nr_ins++;
+                }
+                // Goto next weight
+                $i++;
             }
-            $fieldnames .= $field_name;
-            $fieldvalues .= is_numeric( $the_measurements[$field_name.'_'.$i]) ? $the_measurements[$field_name.'_'.$i] : 'NULL';
-          }
-          db_query( "INSERT INTO {growthcurve_ref_curves_measurements} (curve_id, moment, $fieldnames, comments) VALUES ( %d, '%s', $fieldvalues, '%s')",
-                    $ref_id,
-                    $the_measurements['conv_date_'.$i],
-                    $the_measurements['comment_'.$i]);
-          $nr_ins++;
+            // TODO: make this message translatable (or remove it altogether)
+            if (IN_DEBUG || user_access("administer growthcurve")) {
+                drupal_set_message("$nr_ins measurements added, $nr_upd updated and $nr_del deleted");
+            }
         }
-        // Goto next weight
-        $i++;
-      }
-      // TODO: make this message translatable (or remove it altogether)
-      if (IN_DEBUG || user_access("administer growthcurve")) {
-      	drupal_set_message( "$nr_ins measurements added, $nr_upd updated and $nr_del deleted");
-      }
     }
-  }
-  // Lookup the measurements of this ref-curve
-  $result = db_query( "SELECT moment, measurement_id, "._get_field_names().", comments FROM {growthcurve_ref_curves_measurements} WHERE curve_id = $ref_id ORDER BY moment");
-  $rows = array();
-  $i = 0;
-  while ($measurement = db_fetch_array($result)) {
-    $rows[] = _measurement_row( $measurement, $i++, true);
-  }
-  return _weight_table( $header_msg, $rows, NULL, true);
+    // Lookup the measurements of this ref-curve
+    $result = db_query("SELECT moment, measurement_id, " . _get_field_names() . ", comments FROM {growthcurve_ref_curves_measurements} WHERE curve_id = $ref_id ORDER BY moment");
+    $rows = array();
+    $i = 0;
+    while ($measurement = db_fetch_array($result)) {
+        $rows[] = _measurement_row($measurement, $i++, true);
+    }
+    return _weight_table($header_msg, $rows, NULL, true);
 }
 
 /**
@@ -886,51 +918,54 @@ function growthcurve_admin_ref_measurements($ref_id = '') {
  * List all children this user want to keep track of
  * @returns HTML for overview-screen
  */
-function growthcurve_main_display() {
-  // List all children of this parent
+function growthcurve_main_display()
+{
+    // List all children of this parent
 
-  // Fetch the rows  
-  global $user;
-  $result = db_query( "SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
-  $rows = array();
-  while ($child = db_fetch_array($result)) {
-    $rows[] = array(array('data' => $child['name'], 'class' => 'block'),
-      // TODO: should add date format in user-selected format
-      array( 'data' => format_date( $child['dob'], 'custom', DATE_FORMAT), 'align' => 'right', 'style' => 'font-family: courier;'),
-      $child['story'],
-      l(t('curve'), 'growthcurve/view/'. $child['child_id']),
-      l(t('edit'), 'growthcurve/edit/'. $child['child_id']),
-      l(t('measurements'), 'growthcurve/measurements/'. $child['child_id']),
-      l(t('remove'), 'growthcurve/remove/'. $child['child_id']));
-  }
-  if ( sizeof( $rows)) {
-    // Create the header
-    $content = t( "These are the children you want to keep track of. Feel free to add more or change them.")."<br>\n";
-    $header = array(t('Name'), t('DOB'), t('Story'));
-    $header[] = array('data' => t('Operations'), 'colspan' => 4);
-    $content .= theme('table', $header, $rows, array('id' => 'children'));
-  } else {
-    $content = _help_info()."\n";
-  }
-  $content .= '<p>' . _add_child_link() . '</p>';
-  return $content;
+    // Fetch the rows
+    global $user;
+    $result = db_query("SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
+    $rows = array();
+    while ($child = db_fetch_array($result)) {
+        $rows[] = array(array('data' => $child['name'], 'class' => 'block'),
+            // TODO: should add date format in user-selected format
+            array('data' => format_date($child['dob'], 'custom', DATE_FORMAT), 'align' => 'right', 'style' => 'font-family: courier;'),
+            $child['story'],
+            l(t('curve'), 'growthcurve/view/' . $child['child_id']),
+            l(t('edit'), 'growthcurve/edit/' . $child['child_id']),
+            l(t('measurements'), 'growthcurve/measurements/' . $child['child_id']),
+            l(t('remove'), 'growthcurve/remove/' . $child['child_id']));
+    }
+    if (sizeof($rows)) {
+        // Create the header
+        $content = t("These are the children you want to keep track of. Feel free to add more or change them.") . "<br>\n";
+        $header = array(t('Name'), t('DOB'), t('Story'));
+        $header[] = array('data' => t('Operations'), 'colspan' => 4);
+        $content .= theme('table', $header, $rows, array('id' => 'children'));
+    } else {
+        $content = _help_info() . "\n";
+    }
+    $content .= '<p>' . _add_child_link() . '</p>';
+    return $content;
 }
 
 /**
  *
  * @return the content to be redered on the client
  */
-function growthcurve_main_usermanager() {
-	$content = "<h1>".t("User Manager")."</h1>";
-	$content .= "<iframe class=\"UserManager\" src=\"/groeicurve/modules/growthcurve/UserManager/UserManager.html\"/>";
-	print theme('page', $content);
+function growthcurve_main_usermanager()
+{
+    $content = "<h1>" . t("User Manager") . "</h1>";
+    $content .= "<iframe class=\"UserManager\" src=\"/groeicurve/modules/growthcurve/UserManager/UserManager.html\"/>";
+    print theme('page', $content);
 }
 
 /**
  * Callback for the main overview-screen
  */
-function growthcurve_main() {
-  print theme('page', growthcurve_main_display());
+function growthcurve_main()
+{
+    print theme('page', growthcurve_main_display());
 }
 
 /**
@@ -938,62 +973,65 @@ function growthcurve_main() {
  * @param child child-object that should be displayed
  * @returns HTML for configuration-screen
  */
-function growthcurve_child_form($child) {
-  $output = form_textfield(t('Childs name'), 'name', $child->name, 50, 64, t('The name of the child to add.'), NULL, TRUE);
-  $output .= form_radios(t('Gender'),'gender',$child->gender,array( 'm' => t('Male'), 'f' => t('Female')),t('The gender of the child'), TRUE);
-  $output .= form_textfield(t('Date of birth'), 'date', $child->date, 40, 25, t('The date the child was born (enter the date in the format dd-mm-yyyy or yyyy-mmm-dd)'), NULL, TRUE);
-  // TODO: add ethnic background as a setting so we can determine what ref-curve to use
-  $output .= form_textarea(t('Childs story'), 'story', $child->story, 70, 10, t('A brief story on this child. This is only for yourself and is not used in any way. You can do with it what you like.'));
+function growthcurve_child_form($child)
+{
+    $output = form_textfield(t('Childs name'), 'name', $child->name, 50, 64, t('The name of the child to add.'), NULL, TRUE);
+    $output .= form_radios(t('Gender'), 'gender', $child->gender, array('m' => t('Male'), 'f' => t('Female')), t('The gender of the child'), TRUE);
+    $output .= form_textfield(t('Date of birth'), 'date', $child->date, 40, 25, t('The date the child was born (enter the date in the format dd-mm-yyyy or yyyy-mmm-dd)'), NULL, TRUE);
+    // TODO: add ethnic background as a setting so we can determine what ref-curve to use
+    $output .= form_textarea(t('Childs story'), 'story', $child->story, 70, 10, t('A brief story on this child. This is only for yourself and is not used in any way. You can do with it what you like.'));
 
-  return $output;
+    return $output;
 }
 
-function _convert_date($matches, &$date) {
+function _convert_date($matches, &$date)
+{
     // TODO: check what format the user gave in his/her preferences and check that first
     // Now check euro-format first
-    if ( checkdate( $matches[ 2], $matches[ 1], $matches[ 3])) { // in Euro-format
-      $date = mktime( 5, 0, 0, $matches[ 2], $matches[ 1], $matches[ 3], -1);
-    } elseif ( checkdate( $matches[ 1], $matches[ 2], $matches[ 3])) { // in US Format?
-      $date = mktime( 5, 0, 0, $matches[ 1], $matches[ 2], $matches[ 3], -1);
+    if (checkdate($matches[2], $matches[1], $matches[3])) { // in Euro-format
+        $date = mktime(5, 0, 0, $matches[2], $matches[1], $matches[3], -1);
+    } elseif (checkdate($matches[1], $matches[2], $matches[3])) { // in US Format?
+        $date = mktime(5, 0, 0, $matches[1], $matches[2], $matches[3], -1);
     } else {
-      return FALSE;
+        return FALSE;
     }
     if ($date === FALSE) {
-      watchdog( 'gc', 'Error converting date ['.implode(",", $matches).'] (1).');
-      return FALSE;
+        watchdog('gc', 'Error converting date [' . implode(",", $matches) . '] (1).');
+        return FALSE;
     }
     return TRUE;
 }
 
-function form_validate_date( $str_date, &$date) {
-  // match to a format
-  if ( preg_match( '/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/', $str_date, $matches)) {
-    if ( checkdate( $matches[ 2], $matches[ 3], $matches[ 1])) { // in Internet-format
-      $date = mktime( 5, 0, 0, $matches[ 2], $matches[ 3], $matches[ 1], -1);
+function form_validate_date($str_date, &$date)
+{
+    // match to a format
+    if (preg_match('/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/', $str_date, $matches)) {
+        if (checkdate($matches[2], $matches[3], $matches[1])) { // in Internet-format
+            $date = mktime(5, 0, 0, $matches[2], $matches[3], $matches[1], -1);
+        } else {
+            return FALSE;
+        }
+    } elseif (preg_match('/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/', $str_date, $matches)) {
+        if (!_convert_date($matches, $date)) {
+            return FALSE;
+        }
+    } elseif (preg_match('/(\d{1,2})[\/-](\d{1,2})[\/-](\d{1,2})/', $str_date, $matches)) {
+        if ($matches[3] <= 38) { // Stop at the end of the Unix calendar... :-(
+            $matches[3] += 2000;
+        } elseif ($matches[3] < 100) {
+            $matches[3] += 1900;
+        }
+        if (!_convert_date($matches, $date)) {
+            return FALSE;
+        }
     } else {
-      return FALSE;
+        return FALSE;
     }
-  } elseif ( preg_match( '/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/', $str_date, $matches)) {
-  	if (!_convert_date($matches, $date)) {
-  		return FALSE;
-  	}
-  } elseif ( preg_match( '/(\d{1,2})[\/-](\d{1,2})[\/-](\d{1,2})/', $str_date, $matches)) {
-  	if ($matches[3] <= 38) { // Stop at the end of the Unix calendar... :-( 
-  		$matches[3] += 2000;
-  	} elseif ($matches[3] < 100) {
-  		$matches[3] += 1900;
-  	}
-  	if (!_convert_date($matches, $date)) {
-  		return FALSE;
-  	}
-  } else {
-    return FALSE;
-  }
-  if ($date === FALSE) {
-    watchdog( 'gc', 'Error converting date ['.$str_date.'] (2).');
-    return FALSE;
-  }
-  return TRUE;
+    if ($date === FALSE) {
+        watchdog('gc', 'Error converting date [' . $str_date . '] (2).');
+        return FALSE;
+    }
+    return TRUE;
 }
 
 /**
@@ -1001,27 +1039,29 @@ function form_validate_date( $str_date, &$date) {
  * @param child child-object that should be validated
  * @returns the validated child-object AND errors in the form-error-list
  */
-function growthcurve_child_validate( $child) {
-  // Convert the node to an object, if necessary.
-  $child = array2object($child);
+function growthcurve_child_validate($child)
+{
+    // Convert the node to an object, if necessary.
+    $child = array2object($child);
 
-  // Validate the name field.
-  if (isset($child->name)) {
-    if (trim($child->name) == '') {
-      form_set_error('name', t('You have to specify a name.'));
+    // Validate the name field.
+    if (isset($child->name)) {
+        if (trim($child->name) == '') {
+            form_set_error('name', t('You have to specify a name.'));
+        }
     }
-  }
 
-  // Validate the "dob" field.
-  // TODO -l 5: allow for other date formats!
-  //            It's not a user setting yet.
-  if ( ( $child->date == '')
-  || ( !form_validate_date( $child->date, $child->dob))) { 
-    form_set_error('date', t('You have to specify a valid date of birth.'));
-  }
-  
-  $child->validated = TRUE;
-  return $child;
+    // Validate the "dob" field.
+    // TODO -l 5: allow for other date formats!
+    //            It's not a user setting yet.
+    if (($child->date == '')
+        || (!form_validate_date($child->date, $child->dob))
+    ) {
+        form_set_error('date', t('You have to specify a valid date of birth.'));
+    }
+
+    $child->validated = TRUE;
+    return $child;
 }
 
 /**
@@ -1030,338 +1070,348 @@ function growthcurve_child_validate( $child) {
  * @param child_id id of the child-record in the db (NULL -> create a new record)
  * @returns the validated child-object AND errors in the form-error-list
  */
-function _growthcurve_child_save( $child, $child_id = NULL) {
-  // Insert this child into the db...
-  if (isset($child_id)) {
-    db_query("UPDATE {growthcurve_children} SET name = '%s', dob = '%s', gender = '%s', story = '%s' WHERE child_id = %d", $child->name, $child->dob, $child->gender, $child->story, $child_id);
-  }
-  else {
-    global $user;
-    db_query("INSERT INTO {growthcurve_children} (name, dob, gender, story, uid) VALUES  ('%s', '%s', '%s', '%s', %d)", $child->name, $child->dob, $child->gender, $child->story, $user->uid);
-  }
+function _growthcurve_child_save($child, $child_id = NULL)
+{
+    // Insert this child into the db...
+    if (isset($child_id)) {
+        db_query("UPDATE {growthcurve_children} SET name = '%s', dob = '%s', gender = '%s', story = '%s' WHERE child_id = %d", $child->name, $child->dob, $child->gender, $child->story, $child_id);
+    }
+    else {
+        global $user;
+        db_query("INSERT INTO {growthcurve_children} (name, dob, gender, story, uid) VALUES  ('%s', '%s', '%s', '%s', %d)", $child->name, $child->dob, $child->gender, $child->story, $user->uid);
+    }
 }
 
 /**
  * Menu call-back: This will show a edit screen for a child to be added.
  * It will also give feed-back when not all required fields have been filled-in correctly
  */
-function growthcurve_child_add() {
-  $child = $_POST['edit'];
-  $op = $_POST['op'];
+function growthcurve_child_add()
+{
+    $child = $_POST['edit'];
+    $op = $_POST['op'];
 
-  switch ($op) {
-    case t('Add child'):
-      $child = growthcurve_child_validate($child);
-      if (!form_get_errors()) {
-        _growthcurve_child_save($child);
-        drupal_set_message(t('Child %name has been added.', array( '%name' => $child->name)));
-        menu_rebuild();
-        drupal_goto('growthcurve');
-      }
-    default:
-  }
-  $form = growthcurve_child_form($child);
-  $form .= form_submit(t('Add child'));
-  $output .= form($form);
+    switch ($op) {
+        case t('Add child'):
+            $child = growthcurve_child_validate($child);
+            if (!form_get_errors()) {
+                _growthcurve_child_save($child);
+                drupal_set_message(t('Child %name has been added.', array('%name' => $child->name)));
+                menu_rebuild();
+                drupal_goto('growthcurve');
+            }
+        default:
+    }
+    $form = growthcurve_child_form($child);
+    $form .= form_submit(t('Add child'));
+    $output .= form($form);
 
-  $output .= _SetFocusField('name');
+    $output .= _SetFocusField('name');
 
-  print theme('page', $output);
+    print theme('page', $output);
 }
 
-function _get_child($child_id) {
-  return db_fetch_object( db_query( "SELECT * FROM {growthcurve_children} WHERE child_id = ".$child_id));
+function _get_child($child_id)
+{
+    return db_fetch_object(db_query("SELECT * FROM {growthcurve_children} WHERE child_id = " . $child_id));
 }
 
 /*
  *
  */
-function get_time_span_entered( $child_id) {
-	$time_span = db_fetch_object( db_query( "SELECT ( max(moment) - min(moment)) value FROM {growthcurve_measurements} WHERE child_id = ".$child_id));
-	return $time_span->value;
+function get_time_span_entered($child_id)
+{
+    $time_span = db_fetch_object(db_query("SELECT ( max(moment) - min(moment)) value FROM {growthcurve_measurements} WHERE child_id = " . $child_id));
+    return $time_span->value;
 }
 
 /**
  * Menu call-back: This will show a edit screen for a child
  * It will also give feed-back when not all required fields have been filled-in correctly
  */
-function growthcurve_child_edit($child_id, $field_to_focus = NULL) {
-  $child = _CheckAccess( $child_id);
-	if ($child == NOTYOURCHILD) {
-    _ErrorNotYourChild();
-		return;
-  }
-  if ($child == CHILDNOTFOUND) {
-    _ErrorChildNotFound();
-    return;
-  }
-  $child = $_POST['edit'];
-  $op = $_POST['op'];
+function growthcurve_child_edit($child_id, $field_to_focus = NULL)
+{
+    $child = _CheckAccess($child_id);
+    if ($child == NOTYOURCHILD) {
+        _ErrorNotYourChild();
+        return;
+    }
+    if ($child == CHILDNOTFOUND) {
+        _ErrorChildNotFound();
+        return;
+    }
+    $child = $_POST['edit'];
+    $op = $_POST['op'];
 
-  switch ($op) {
-    case t('Save child'):
-      $child = growthcurve_child_validate( $child);
-      if (!form_get_errors()) {
-        _growthcurve_child_save( $child, $child_id);
-        drupal_set_message(t('The details of %name have been saved.', array( '%name' => $child->name)));
-        menu_rebuild();
-        drupal_goto('growthcurve');
-      }
+    switch ($op) {
+        case t('Save child'):
+            $child = growthcurve_child_validate($child);
+            if (!form_get_errors()) {
+                _growthcurve_child_save($child, $child_id);
+                drupal_set_message(t('The details of %name have been saved.', array('%name' => $child->name)));
+                menu_rebuild();
+                drupal_goto('growthcurve');
+            }
 
-    default:
-      $child = _get_child($child_id);
+        default:
+            $child = _get_child($child_id);
 
-      $child->date = format_date( $child->dob, 'custom', DATE_FORMAT);
-  }
+            $child->date = format_date($child->dob, 'custom', DATE_FORMAT);
+    }
 
-  $form = growthcurve_child_form( $child);
-  $form .= form_submit(t('Save child'));
-  $output .= form($form);
-	
-  if ($field_to_focus == 'date') {
-    $output .= _SetFocusField('date');
-  } else {
-    $output .= _SetFocusField('name');
-  }
+    $form = growthcurve_child_form($child);
+    $form .= form_submit(t('Save child'));
+    $output .= form($form);
 
-  print theme('page', $output);
+    if ($field_to_focus == 'date') {
+        $output .= _SetFocusField('date');
+    } else {
+        $output .= _SetFocusField('name');
+    }
+
+    print theme('page', $output);
 }
 
-function growthcurve_child_remove($child_id) {
-	$child = _CheckAccess( $child_id);
-	if ($child == NOTYOURCHILD) {
-    _ErrorNotYourChild();
-		return;
-  }
-  if ($child == CHILDNOTFOUND) {
-    _ErrorChildNotFound();
-    return;
-  }
+function growthcurve_child_remove($child_id)
+{
+    $child = _CheckAccess($child_id);
+    if ($child == NOTYOURCHILD) {
+        _ErrorNotYourChild();
+        return;
+    }
+    if ($child == CHILDNOTFOUND) {
+        _ErrorChildNotFound();
+        return;
+    }
 
-  $op = $_POST['op'];
+    $op = $_POST['op'];
 
-  if ($_POST['edit']['confirm']) {
-    db_query('DELETE FROM {growthcurve_children} WHERE child_id = %d', $child_id);
-    drupal_set_message(t('The child %name has been removed from your list of children.', array('%name' => theme('placeholder', $child->name))));
-    menu_rebuild();
-    drupal_goto('growthcurve');
-  }
-  else {
-    $output = theme('confirm',
-                    t('Are you sure you want to remove %name from the list of children?', array('%name' => theme('placeholder', $child->name))),
-                    'growthcurve',
-                    NULL,
-                    t('Remove'));
-  }
+    if ($_POST['edit']['confirm']) {
+        db_query('DELETE FROM {growthcurve_children} WHERE child_id = %d', $child_id);
+        drupal_set_message(t('The child %name has been removed from your list of children.', array('%name' => theme('placeholder', $child->name))));
+        menu_rebuild();
+        drupal_goto('growthcurve');
+    }
+    else {
+        $output = theme('confirm',
+            t('Are you sure you want to remove %name from the list of children?', array('%name' => theme('placeholder', $child->name))),
+            'growthcurve',
+            NULL,
+            t('Remove'));
+    }
 
-  print theme('page', $output);
+    print theme('page', $output);
 }
 
 /**
  *
  */
-function _measurement_row( $measurement, $i, $add_groups = false) {
-  global $ref_curves_groups;
-  $fields = array();
-  // TODO: change date format
-  $fields[] = array('data' => form_textfield('', 'date_'.$i,
-                      ( $measurement['moment'] ? format_date( $measurement['moment'], 'custom', DATE_FORMAT) : ( $measurement['moment_str'] ? $measurement['moment_str'] : '')), 12, 25, NULL, NULL, TRUE).
-                      ( $measurement['measurement_id'] ? form_hidden('measurement_id_'.$i, $measurement['measurement_id']) : '').  // ID of the weight when given
-                      ( form_hidden('del_weight_'.$i, 'ok')),                                                     // Should this row be deleted
-                    'class' => 'date');
-  // Weight
-  if ($add_groups) {
-    for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-      if ($grp < 0) {
-        $str_grp = 'm'.abs($grp);
-      } else {
-        $str_grp = ''.$grp;
-      }
-      $fields[] = array('data' => form_textfield('', 'weight_'.$str_grp.'_'.$i,
-                                                 ( $measurement['weight_'.$str_grp] ? sprintf( "%d", $measurement['weight_'.$str_grp]) : $measurement['weight_str_'.$str_grp]),
-                                                 8, 64, NULL, NULL, TRUE),
-                        'id' => 'wgrp_'.$str_grp,
-                        'name' => 'wgrp_'.$str_grp,
-                        'class' => 'weight');
+function _measurement_row($measurement, $i, $add_groups = false)
+{
+    global $ref_curves_groups;
+    $fields = array();
+    // TODO: change date format
+    $fields[] = array('data' => form_textfield('', 'date_' . $i,
+        ($measurement['moment'] ? format_date($measurement['moment'], 'custom', DATE_FORMAT) : ($measurement['moment_str'] ? $measurement['moment_str'] : '')), 12, 25, NULL, NULL, TRUE) .
+        ($measurement['measurement_id'] ? form_hidden('measurement_id_' . $i, $measurement['measurement_id']) : '') . // ID of the weight when given
+        (form_hidden('del_weight_' . $i, 'ok')), // Should this row be deleted
+        'class' => 'date');
+    // Weight
+    if ($add_groups) {
+        for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+            if ($grp < 0) {
+                $str_grp = 'm' . abs($grp);
+            } else {
+                $str_grp = '' . $grp;
+            }
+            $fields[] = array('data' => form_textfield('', 'weight_' . $str_grp . '_' . $i,
+                ($measurement['weight_' . $str_grp] ? sprintf("%d", $measurement['weight_' . $str_grp]) : $measurement['weight_str_' . $str_grp]),
+                8, 64, NULL, NULL, TRUE),
+                'id' => 'wgrp_' . $str_grp,
+                'name' => 'wgrp_' . $str_grp,
+                'class' => 'weight');
+        }
+    } else {
+        // TODO: allow weight & length in something else than metric units (maybe allow decimals as wel, field is already float)
+        $fields[] = array('data' => form_textfield('', 'weight_' . $i,
+            ($measurement['weight'] ? sprintf("%d", $measurement['weight']) : ($measurement['weight_str'] ? $measurement['weight_str'] : '')),
+            8, 64, NULL, NULL, TRUE),
+            'class' => 'weight');
     }
-  } else {
-    // TODO: allow weight & length in something else than metric units (maybe allow decimals as wel, field is already float)
-    $fields[] = array('data' => form_textfield('', 'weight_'.$i,
-                                               ( $measurement['weight'] ? sprintf( "%d", $measurement['weight']) : ( $measurement['weight_str'] ? $measurement['weight_str'] : '')),
-                                               8, 64, NULL, NULL, TRUE),
-                      'class' => 'weight');
-  }
-  // Length
-  if ($add_groups) {
-    for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-      if ($grp < 0) {
-        $str_grp = 'm'.abs($grp);
-      } else {
-        $str_grp = ''.$grp;
-      }
-      $fields[] = array('data' => form_textfield('', 'length_'.$str_grp.'_'.$i,
-                                                 ( $measurement['length_'.$str_grp] ? sprintf( "%d", $measurement['length_'.$str_grp]) : $measurement['length_str_'.$str_grp]),
-                                                 8, 64, NULL, NULL, TRUE),
-                        'id' => 'lgrp_'.$str_grp,
-                        'name' => 'lgrp_'.$str_grp,
-                        'class' => 'length');
+    // Length
+    if ($add_groups) {
+        for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+            if ($grp < 0) {
+                $str_grp = 'm' . abs($grp);
+            } else {
+                $str_grp = '' . $grp;
+            }
+            $fields[] = array('data' => form_textfield('', 'length_' . $str_grp . '_' . $i,
+                ($measurement['length_' . $str_grp] ? sprintf("%d", $measurement['length_' . $str_grp]) : $measurement['length_str_' . $str_grp]),
+                8, 64, NULL, NULL, TRUE),
+                'id' => 'lgrp_' . $str_grp,
+                'name' => 'lgrp_' . $str_grp,
+                'class' => 'length');
+        }
+    } else {
+        // TODO: allow length & length in something else than metric units (maybe allow decimals as wel, field is already float)
+        $fields[] = array('data' => form_textfield('', 'length_' . $i, ($measurement['length'] ? sprintf("%d", $measurement['length']) : ($measurement['length_str'] ? $measurement['length_str'] : '')), 8, 64, NULL, NULL, TRUE),
+            'class' => 'length');
     }
-  } else {
-    // TODO: allow length & length in something else than metric units (maybe allow decimals as wel, field is already float)
-    $fields[] = array('data' => form_textfield('', 'length_'.$i, ( $measurement['length'] ? sprintf( "%d", $measurement['length']) : ( $measurement['length_str'] ? $measurement['length_str'] : '')), 8, 64, NULL, NULL, TRUE),
-                      'class' => 'length');
-  }
-  $fields[] = array('data' => form_textfield('', 'comment_'.$i, ( $measurement['comments'] ? $measurement['comments'] : ''), 30, 64, NULL, NULL, TRUE),
-                    'class' => 'gc_comments');
-  // TODO: add support for when NO JavaScript is available...
-  $fields[] = "<a href='javascript:removeRow(".$i.");' onclick=''>".t('remove')."</a>";
-  return array(
-      'data' => $fields,
-      'id' => 'row_'.$i
-      );
-//      l(t('remove'), 'xxxxxxxxxxxx'. $measurement['measurement_id']));
+    $fields[] = array('data' => form_textfield('', 'comment_' . $i, ($measurement['comments'] ? $measurement['comments'] : ''), 30, 64, NULL, NULL, TRUE),
+        'class' => 'gc_comments');
+    // TODO: add support for when NO JavaScript is available...
+    $fields[] = "<a href='javascript:removeRow(" . $i . ");' onclick=''>" . t('remove') . "</a>";
+    return array(
+        'data' => $fields,
+        'id' => 'row_' . $i
+    );
+    //      l(t('remove'), 'xxxxxxxxxxxx'. $measurement['measurement_id']));
 }
 
-function _validate_measurement( &$the_measurements, $i, $groups = false) {
-  // See if the data is correct
-  $all_ok = TRUE;
+function _validate_measurement(&$the_measurements, $i, $groups = false)
+{
+    // See if the data is correct
+    $all_ok = TRUE;
 
-  // The date, is it given at all?
-  if ( ( $the_measurements['date_'.$i] == '')
-  ||   ( !form_validate_date( $the_measurements['date_'.$i], $the_measurements['conv_date_'.$i]))) {
-    // TODO: see if this error has already been set... second-time, there should not be a message... come to think of it, I don't thing Drupal supports that.
-    //       We could search 'form_get_errors' for this, but that might be rather expensive
-    //       But we need to make sure that the field is marked. Maybe we should talk to the Drupal developers about this!
-    form_set_error('date_'.$i, t('You have to specify a valid date in the marked field.'));
-    $all_ok = FALSE;
-  } else {
-    if ( $the_measurements['conv_date_'.$i] == null) {
-      // What to do with a null-date??
-      watchdog( 'gc', 'Error converting date ['.$the_measurements['date_'.$i].'] (3).');
-      form_set_error('date_'.$i, t('Er is iets mis met ons datum systeem waardoor we de gamarkeerde datum vandaag niet kunnen omzetten, probeer morgen nogmaals.'));
-      $all_ok = FALSE;
-    }
-  }
-
-  if ($groups) {
-    global $ref_curves_groups;
-  
-    for( $grp = -($ref_curves_groups); $grp <= $ref_curves_groups ; $grp++) {
-      if ($grp < 0) {
-        // $the_measurements['weight_m'.abs($grp)];
-      } else {
-        // $the_measurements['weight_'.$grp];
-      }
-    }
-    // Did the user give a weight at all?
-    if ( !is_numeric( $the_measurements['weight_0_'.$i]) && ( $the_measurements['weight_0_'.$i] != '')) {
-      // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
-      form_set_error('weight_0_'.$i, t('You have to specify a valid weight in the marked row.'));
-      $all_ok = FALSE;
-    }
-    // Did the user give a length at all?
-    if (!is_numeric( $the_measurements['length_0_'.$i]) && ( $the_measurements['length_0_'.$i] != '')) {
-      // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
-      form_set_error('length_0_'.$i, t('You have to specify a valid length in the marked row.'));
-      $all_ok = FALSE;
-    }
-  } else {
-    // Did the user give a weight at all?
-    if ( !is_numeric( $the_measurements['weight_'.$i]) && ( $the_measurements['weight_'.$i] != '')) {
-      // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
-      form_set_error('weight_'.$i, t('You have to specify a valid weight in the marked row.'));
-      $all_ok = FALSE;
+    // The date, is it given at all?
+    if (($the_measurements['date_' . $i] == '')
+        || (!form_validate_date($the_measurements['date_' . $i], $the_measurements['conv_date_' . $i]))
+    ) {
+        // TODO: see if this error has already been set... second-time, there should not be a message... come to think of it, I don't thing Drupal supports that.
+        //       We could search 'form_get_errors' for this, but that might be rather expensive
+        //       But we need to make sure that the field is marked. Maybe we should talk to the Drupal developers about this!
+        form_set_error('date_' . $i, t('You have to specify a valid date in the marked field.'));
+        $all_ok = FALSE;
+    } else {
+        if ($the_measurements['conv_date_' . $i] == null) {
+            // What to do with a null-date??
+            watchdog('gc', 'Error converting date [' . $the_measurements['date_' . $i] . '] (3).');
+            form_set_error('date_' . $i, t('Er is iets mis met ons datum systeem waardoor we de gamarkeerde datum vandaag niet kunnen omzetten, probeer morgen nogmaals.'));
+            $all_ok = FALSE;
+        }
     }
 
-    // Did the user give a length at all?
-    if (!is_numeric( $the_measurements['length_'.$i]) && ( $the_measurements['length_'.$i] != '')) {
-      // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
-      form_set_error('length_'.$i, t('You have to specify a valid length in the marked row.'));
-      $all_ok = FALSE;
+    if ($groups) {
+        global $ref_curves_groups;
+
+        for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
+            if ($grp < 0) {
+                // $the_measurements['weight_m'.abs($grp)];
+            } else {
+                // $the_measurements['weight_'.$grp];
+            }
+        }
+        // Did the user give a weight at all?
+        if (!is_numeric($the_measurements['weight_0_' . $i]) && ($the_measurements['weight_0_' . $i] != '')) {
+            // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
+            form_set_error('weight_0_' . $i, t('You have to specify a valid weight in the marked row.'));
+            $all_ok = FALSE;
+        }
+        // Did the user give a length at all?
+        if (!is_numeric($the_measurements['length_0_' . $i]) && ($the_measurements['length_0_' . $i] != '')) {
+            // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
+            form_set_error('length_0_' . $i, t('You have to specify a valid length in the marked row.'));
+            $all_ok = FALSE;
+        }
+    } else {
+        // Did the user give a weight at all?
+        if (!is_numeric($the_measurements['weight_' . $i]) && ($the_measurements['weight_' . $i] != '')) {
+            // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
+            form_set_error('weight_' . $i, t('You have to specify a valid weight in the marked row.'));
+            $all_ok = FALSE;
+        }
+
+        // Did the user give a length at all?
+        if (!is_numeric($the_measurements['length_' . $i]) && ($the_measurements['length_' . $i] != '')) {
+            // TODO: see if this error has been set already... second-time, there should not be a message... come to think of it, I don' thing Drupal supports that.
+            form_set_error('length_' . $i, t('You have to specify a valid length in the marked row.'));
+            $all_ok = FALSE;
+        }
+
+        // Did the user give at least a measurement?
+        if (($the_measurements['weight_' . $i] == '') && ($the_measurements['length_' . $i] == '')) {
+            // TODO: make sure the row is selected somehow iso just the field.
+            form_set_error('weight_' . $i, t('You have to specify at least one: a weight or a length in the marked row.'));
+            $all_ok = FALSE;
+        }
     }
 
-    // Did the user give at least a measurement?
-    if ( ( $the_measurements['weight_'.$i] == '') && ( $the_measurements['length_'.$i] == '')) {
-      // TODO: make sure the row is selected somehow iso just the field.
-      form_set_error('weight_'.$i, t('You have to specify at least one: a weight or a length in the marked row.'));
-      $all_ok = FALSE;
-    }
-  }
+    // The comment is optional, don't check. (Maybe convert so it does not have ' etc. in it)
 
-  // The comment is optional, don't check. (Maybe convert so it does not have ' etc. in it)
-
-  // Tell ifwe had errors
-  return $all_ok;
+    // Tell ifwe had errors
+    return $all_ok;
 }
 
 /**
  *   Build the page that contains the weights table
  */
-function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups = false) {
-  global $ref_curves_groups;
-  // Always add 3 new empty lines
-  $measurement = NULL; // or empty array when needed...
-  $first_empty_one = count( $rows);
-  $i = $first_empty_one;
-  $rows_to_add = NEW_LINES;
-  if ( $first_empty_one < MIN_LINES) {
-  	$rows_to_add = MIN_LINES - $first_empty_one;
-	}
-	if ( $rows_to_add < NEW_LINES) {
-		$rows_to_add = NEW_LINES;
-  }
-  for( $j = 0; $j < $rows_to_add; $j++) {
-    $rows[] = _measurement_row( $measurement, $i++, $add_groups);
-  }
-  // Create the header
-  $content = $header_msg;
-  $header = array(t('Date'));
-  if ( $add_groups) {
-    for( $grp = -($ref_curves_groups); $grp < 0; $grp++) {
-      $header[] = t('Grp m'.abs($grp));
+function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups = false)
+{
+    global $ref_curves_groups;
+    // Always add 3 new empty lines
+    $measurement = NULL; // or empty array when needed...
+    $first_empty_one = count($rows);
+    $i = $first_empty_one;
+    $rows_to_add = NEW_LINES;
+    if ($first_empty_one < MIN_LINES) {
+        $rows_to_add = MIN_LINES - $first_empty_one;
     }
-  }
-  $header[] = t('Weight').' '.t('(gr.)');
-  if ( $add_groups) {
-    for( $grp = 1; $grp < ($ref_curves_groups + 1); $grp++) {
-      $header[] = t('Grp '.$grp);
+    if ($rows_to_add < NEW_LINES) {
+        $rows_to_add = NEW_LINES;
     }
-  }
-  if ( $add_groups) {
-    for( $grp = -($ref_curves_groups); $grp < 0; $grp++) {
-      $header[] = t('LGrp m'.abs($grp));
+    for ($j = 0; $j < $rows_to_add; $j++) {
+        $rows[] = _measurement_row($measurement, $i++, $add_groups);
     }
-  }
-  $header[] = t('Length').' '.t('(cm.)');
-  if ( $add_groups) {
-    for( $grp = 1; $grp < ($ref_curves_groups + 1); $grp++) {
-      $header[] = t('LGrp '.$grp);
+    // Create the header
+    $content = $header_msg;
+    $header = array(t('Date'));
+    if ($add_groups) {
+        for ($grp = -($ref_curves_groups); $grp < 0; $grp++) {
+            $header[] = t('Grp m' . abs($grp));
+        }
     }
-  }
-  $header[] = t('Comment');
-  $header[] = array('data' => t('Operations'), 'colspan' => 1);
-  $content .= theme('table', $header, $rows, array('id' => 'measurements'));
-  $content .= form_hidden('next_row_nr',$i);
-  $content .= form_submit(t('Save and add more'), 'op', array('title' => t('Save your current entries and make space for some more.')));
-  $content .= form_button(t('Undelete'), 'op', 'submit', array( 'onclick' => 'javascript:undelete(); return false;', 'title' => t('Show the deleted rows again (works only before a save is done!)')));
-  //$content .= form_button(t('Add row'), 'op', 'submit', array( 'onclick' => 'javascript:addRows(1); return false;', 'title' => t('Add some empty rows')));
-  // Focus the first empty field or the first field with an error...
-  $errors = form_get_errors();
-  if ( $errors) {
-    // Look for the error field
-    $error_fields = array_keys( $errors);
-    $focus_field = $error_fields[ 0];
-  } elseif ($field_to_focus == 'first') {
-    $focus_field = 'date_0';
-  } else {
-    $focus_field = 'date_'.$first_empty_one;
-  }
-  // TODO: move this to a separate file... (and make it work without JavaScript?)
-  // Make sure the first empty line is focused
-	$content .= _SetFocusField($focus_field);
+    $header[] = t('Weight') . ' ' . t('(gr.)');
+    if ($add_groups) {
+        for ($grp = 1; $grp < ($ref_curves_groups + 1); $grp++) {
+            $header[] = t('Grp ' . $grp);
+        }
+    }
+    if ($add_groups) {
+        for ($grp = -($ref_curves_groups); $grp < 0; $grp++) {
+            $header[] = t('LGrp m' . abs($grp));
+        }
+    }
+    $header[] = t('Length') . ' ' . t('(cm.)');
+    if ($add_groups) {
+        for ($grp = 1; $grp < ($ref_curves_groups + 1); $grp++) {
+            $header[] = t('LGrp ' . $grp);
+        }
+    }
+    $header[] = t('Comment');
+    $header[] = array('data' => t('Operations'), 'colspan' => 1);
+    $content .= theme('table', $header, $rows, array('id' => 'measurements'));
+    $content .= form_hidden('next_row_nr', $i);
+    $content .= form_submit(t('Save and add more'), 'op', array('title' => t('Save your current entries and make space for some more.')));
+    $content .= form_button(t('Undelete'), 'op', 'submit', array('onclick' => 'javascript:undelete(); return false;', 'title' => t('Show the deleted rows again (works only before a save is done!)')));
+    //$content .= form_button(t('Add row'), 'op', 'submit', array( 'onclick' => 'javascript:addRows(1); return false;', 'title' => t('Add some empty rows')));
+    // Focus the first empty field or the first field with an error...
+    $errors = form_get_errors();
+    if ($errors) {
+        // Look for the error field
+        $error_fields = array_keys($errors);
+        $focus_field = $error_fields[0];
+    } elseif ($field_to_focus == 'first') {
+        $focus_field = 'date_0';
+    } else {
+        $focus_field = 'date_' . $first_empty_one;
+    }
+    // TODO: move this to a separate file... (and make it work without JavaScript?)
+    // Make sure the first empty line is focused
+    $content .= _SetFocusField($focus_field);
 
-  // Other JavaScrip for delete/undelete
-  $content .= '<SCRIPT TYPE="text/javascript">
+    // Other JavaScrip for delete/undelete
+    $content .= '<SCRIPT TYPE="text/javascript">
   <!--
   // REVIEW: What does this mean, what is it for?
   // TODO: Add something to remove /first from the action of the form
@@ -1407,195 +1457,206 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
   //-->
 </SCRIPT>
 ';
-  
-  return form($content);
+
+    return form($content);
 }
 
 /**
  * A screen for editing the measurements
  */
-function growthcurve_measurements($child_id = -1, $field_to_focus = NULL) {
-  // See if this is called without any parameters, then use the first child.
-  if ( -1 == $child_id) {
-    $child_id = _get_first_child();
-    if ( !$child_id) {
-      print theme('page', t('Please add at least one child first') . '<br>' . _add_child_link());
-      return;
-    }
-  }
-  $child = _CheckAccess( $child_id);
-	if ($child == NOTYOURCHILD) {
-    _ErrorNotYourChild();
-		return;
-  }
-  if ($child == CHILDNOTFOUND) {
-    _ErrorChildNotFound();
-    return;
-  }
-
-  $header_msg = t("Measurements of %name<br>\nOne can enter the date in the format yyyy-mmm-dd and dd-mm-yyyy. The weight should be in <b>grams</b>, the length should be in <b>centimeters</b>.", array( '%name' => $child->name));
-  $the_measurements = $_POST['edit'];
-  $op = $_POST['op'];
-  if ( t('Save and add more') == $op) {
-    // validate fields
-    $i = 0; $all_ok = TRUE;
-    while ( $the_measurements['date_'.$i]) {
-      $all_ok = $all_ok && _validate_measurement( $the_measurements, $i);
-      $i++;
-    }
-    // When error found, return a form with all posted data...
-    if ( ! $all_ok) {
-      // Send the data back so the user can change it
-      $i = 0;
-      $rows = array();
-      while ( $the_measurements['date_'.$i]) {
-        $measurement['measurement_id']  = $the_measurements['measurement_id_'.$i];
-        $measurement['moment_str'] = $the_measurements['date_'.$i];
-        $measurement['weight_str'] = $the_measurements['weight_'.$i];
-        $measurement['length_str'] = $the_measurements['length_'.$i];
-        $measurement['comments']   = $the_measurements['comment_'.$i];
-        $rows[] = _measurement_row( $measurement, $i);
-        $i++;
-      }
-      print theme('page', _weight_table( $header_msg, $rows, $field_to_focus));
-      return;
-    } else {
-      // Save the details
-      $i = 0; $nr_ins = 0; $nr_upd = 0; $nr_del = 0;
-      while ( $the_measurements['date_'.$i] || ( 'del' == $the_measurements['del_weight_'.$i])) {
-        // See what needs to be done
-        global $user;
-        if ( $the_measurements['measurement_id_'.$i]) {
-          // Update or delete
-          if ( 'del' == $the_measurements['del_weight_'.$i]) {
-            //drupal_set_message( 'Delete '.$the_measurements['measurement_id_'.$i]);
-            db_query( "DELETE FROM {growthcurve_measurements} WHERE child_id = %d AND measurement_id = %d", $child_id, $the_measurements['measurement_id_'.$i]);
-            $nr_del++;
-          } else {
-            //drupal_set_message( 'Update '.$the_measurements['measurement_id_'.$i]);
-            if (($the_measurements['conv_date_'.$i] == 0) || ($the_measurements['conv_date_'.$i] == null)) {
-            	// TODO: we could just stop here, as the date can never be 0 as we always aff 5 hours... (dirty hack)
-            	watchdog( 'gc', 'Something strange with the date...:'.$the_measurements['date_'.$i].",\n"._vds($the_measurements, 'the_measurements').'.');
-            }
-            db_query( "UPDATE {growthcurve_measurements} SET moment = '%s', weight = %s, length = %s, comments = '%s' WHERE child_id = %d AND measurement_id = %d",
-                      $the_measurements['conv_date_'.$i],
-                      is_numeric( $the_measurements['weight_'.$i]) ? $the_measurements['weight_'.$i] : 'NULL',
-                      is_numeric( $the_measurements['length_'.$i]) ? $the_measurements['length_'.$i] : 'NULL',
-                      $the_measurements['comment_'.$i],
-                      $child_id,
-                      $the_measurements['measurement_id_'.$i]);
-            $nr_upd++;
-          }
-        } else {
-          // Insert
-          //drupal_set_message( 'Insert new');
-          db_query( "INSERT INTO {growthcurve_measurements} (child_id, moment, weight, length, comments) VALUES ( %d, '%s', %s, %s, '%s')",
-                    $child_id,
-                    $the_measurements['conv_date_'.$i],
-                    is_numeric( $the_measurements['weight_'.$i]) ? $the_measurements['weight_'.$i] : 'NULL',
-                    is_numeric( $the_measurements['length_'.$i]) ? $the_measurements['length_'.$i] : 'NULL',
-                    $the_measurements['comment_'.$i]);
-          $nr_ins++;
+function growthcurve_measurements($child_id = -1, $field_to_focus = NULL)
+{
+    // See if this is called without any parameters, then use the first child.
+    if (-1 == $child_id) {
+        $child_id = _get_first_child();
+        if (!$child_id) {
+            print theme('page', t('Please add at least one child first') . '<br>' . _add_child_link());
+            return;
         }
-        // Goto next weight
-        $i++;
-      }
-      // TODO: make this message translatable (or remove it altogether)
-      if (IN_DEBUG || user_access("administer growthcurve")) {
-      	drupal_set_message( "$nr_ins measurements added, $nr_upd updated and $nr_del deleted");
-      }
     }
-  }
-  // Lookup the weights of this child
-  $result = db_query( "SELECT * FROM growthcurve_measurements WHERE child_id = $child_id ORDER BY moment");
-  $rows = array();
-  $i = 0;
-  while ($measurement = db_fetch_array($result)) {
-    $rows[] = _measurement_row( $measurement, $i++);
-  }
-  print theme('page', _weight_table( $header_msg, $rows, $field_to_focus));
+    $child = _CheckAccess($child_id);
+    if ($child == NOTYOURCHILD) {
+        _ErrorNotYourChild();
+        return;
+    }
+    if ($child == CHILDNOTFOUND) {
+        _ErrorChildNotFound();
+        return;
+    }
+
+    $header_msg = t("Measurements of %name<br>\nOne can enter the date in the format yyyy-mmm-dd and dd-mm-yyyy. The weight should be in <b>grams</b>, the length should be in <b>centimeters</b>.", array('%name' => $child->name));
+    $the_measurements = $_POST['edit'];
+    $op = $_POST['op'];
+    if (t('Save and add more') == $op) {
+        // validate fields
+        $i = 0;
+        $all_ok = TRUE;
+        while ($the_measurements['date_' . $i]) {
+            $all_ok = $all_ok && _validate_measurement($the_measurements, $i);
+            $i++;
+        }
+        // When error found, return a form with all posted data...
+        if (!$all_ok) {
+            // Send the data back so the user can change it
+            $i = 0;
+            $rows = array();
+            while ($the_measurements['date_' . $i]) {
+                $measurement['measurement_id'] = $the_measurements['measurement_id_' . $i];
+                $measurement['moment_str'] = $the_measurements['date_' . $i];
+                $measurement['weight_str'] = $the_measurements['weight_' . $i];
+                $measurement['length_str'] = $the_measurements['length_' . $i];
+                $measurement['comments'] = $the_measurements['comment_' . $i];
+                $rows[] = _measurement_row($measurement, $i);
+                $i++;
+            }
+            print theme('page', _weight_table($header_msg, $rows, $field_to_focus));
+            return;
+        } else {
+            // Save the details
+            $i = 0;
+            $nr_ins = 0;
+            $nr_upd = 0;
+            $nr_del = 0;
+            while ($the_measurements['date_' . $i] || ('del' == $the_measurements['del_weight_' . $i])) {
+                // See what needs to be done
+                global $user;
+                if ($the_measurements['measurement_id_' . $i]) {
+                    // Update or delete
+                    if ('del' == $the_measurements['del_weight_' . $i]) {
+                        //drupal_set_message( 'Delete '.$the_measurements['measurement_id_'.$i]);
+                        db_query("DELETE FROM {growthcurve_measurements} WHERE child_id = %d AND measurement_id = %d", $child_id, $the_measurements['measurement_id_' . $i]);
+                        $nr_del++;
+                    } else {
+                        //drupal_set_message( 'Update '.$the_measurements['measurement_id_'.$i]);
+                        if (($the_measurements['conv_date_' . $i] == 0) || ($the_measurements['conv_date_' . $i] == null)) {
+                            // TODO: we could just stop here, as the date can never be 0 as we always aff 5 hours... (dirty hack)
+                            watchdog('gc', 'Something strange with the date...:' . $the_measurements['date_' . $i] . ",\n" . _vds($the_measurements, 'the_measurements') . '.');
+                        }
+                        db_query("UPDATE {growthcurve_measurements} SET moment = '%s', weight = %s, length = %s, comments = '%s' WHERE child_id = %d AND measurement_id = %d",
+                            $the_measurements['conv_date_' . $i],
+                            is_numeric($the_measurements['weight_' . $i]) ? $the_measurements['weight_' . $i] : 'NULL',
+                            is_numeric($the_measurements['length_' . $i]) ? $the_measurements['length_' . $i] : 'NULL',
+                            $the_measurements['comment_' . $i],
+                            $child_id,
+                            $the_measurements['measurement_id_' . $i]);
+                        $nr_upd++;
+                    }
+                } else {
+                    // Insert
+                    //drupal_set_message( 'Insert new');
+                    db_query("INSERT INTO {growthcurve_measurements} (child_id, moment, weight, length, comments) VALUES ( %d, '%s', %s, %s, '%s')",
+                        $child_id,
+                        $the_measurements['conv_date_' . $i],
+                        is_numeric($the_measurements['weight_' . $i]) ? $the_measurements['weight_' . $i] : 'NULL',
+                        is_numeric($the_measurements['length_' . $i]) ? $the_measurements['length_' . $i] : 'NULL',
+                        $the_measurements['comment_' . $i]);
+                    $nr_ins++;
+                }
+                // Goto next weight
+                $i++;
+            }
+            // TODO: make this message translatable (or remove it altogether)
+            if (IN_DEBUG || user_access("administer growthcurve")) {
+                drupal_set_message("$nr_ins measurements added, $nr_upd updated and $nr_del deleted");
+            }
+        }
+    }
+    // Lookup the weights of this child
+    $result = db_query("SELECT * FROM growthcurve_measurements WHERE child_id = $child_id ORDER BY moment");
+    $rows = array();
+    $i = 0;
+    while ($measurement = db_fetch_array($result)) {
+        $rows[] = _measurement_row($measurement, $i++);
+    }
+    print theme('page', _weight_table($header_msg, $rows, $field_to_focus));
 }
 
 // A week 7 * 24 * 60 * 60 = 604800
-DEFINE( "TS_WEEK", 604800);
+DEFINE("TS_WEEK", 604800);
 // Long month: 31 * 24 * 60 * 60 (a month) = 2678400
 // Avarage month: 31536000 / 12
-DEFINE( "TS_ARG_MONTH", 2628000);
+DEFINE("TS_ARG_MONTH", 2628000);
 // Year: 60 * 60 * 24 * 365 = 31536000
-DEFINE( "TS_YEAR", 31536000);
+DEFINE("TS_YEAR", 31536000);
 
 /**
  * What are the sizes to use in the graphs based on the age of the child
  */
-function _get_graph_sizes($age) {
-	// What is the ref curve range to use:
-	if ($age <= 31536000) {
-		$gs->time_span = TS_YEAR;
-		$gs->xunits = TS_WEEK;
-	} elseif ($age <= 63072000) {
-		$gs->time_span = 2 * TS_YEAR;
-		$gs->xunits = TS_WEEK;
-	} elseif ($age <= 126144000) {
-		$gs->time_span = 4 * TS_YEAR;
-		$gs->xunits = TS_ARG_MONTH;
-	} elseif ($age <= 157680000) {
-		$gs->time_span = 5 * TS_YEAR;
-		$gs->xunits = TS_ARG_MONTH;
-	} elseif ($age <= 252288000) {
-		$gs->time_span = 8 * TS_YEAR;
-		$gs->xunits = TS_YEAR;
-	} else {
-		$gs->time_span = 18 * TS_YEAR;
-		$gs->xunits = TS_YEAR;
-	}
+function _get_graph_sizes($age)
+{
+    // What is the ref curve range to use:
+    if ($age <= 31536000) {
+        $gs->time_span = TS_YEAR;
+        $gs->xunits = TS_WEEK;
+    } elseif ($age <= 63072000) {
+        $gs->time_span = 2 * TS_YEAR;
+        $gs->xunits = TS_WEEK;
+    } elseif ($age <= 126144000) {
+        $gs->time_span = 4 * TS_YEAR;
+        $gs->xunits = TS_ARG_MONTH;
+    } elseif ($age <= 157680000) {
+        $gs->time_span = 5 * TS_YEAR;
+        $gs->xunits = TS_ARG_MONTH;
+    } elseif ($age <= 252288000) {
+        $gs->time_span = 8 * TS_YEAR;
+        $gs->xunits = TS_YEAR;
+    } else {
+        $gs->time_span = 18 * TS_YEAR;
+        $gs->xunits = TS_YEAR;
+    }
 
-	return $gs;
+    return $gs;
 }
 
 
 /**
  * Draw a dummy curve on a given graph
  */
-function _add_dummy_curve( &$graph) {
-  $moments = array(); $moments[] = 0;
-  $values = array(); $values[] = 0;
-  $p = new LinePlot( $values, $moments);
-  $p->SetColor( 'white');
-  $p->SetFillColor( 'white');
-  $graph->Add( $p);
+function _add_dummy_curve(&$graph)
+{
+    $moments = array();
+    $moments[] = 0;
+    $values = array();
+    $values[] = 0;
+    $p = new LinePlot($values, $moments);
+    $p->SetColor('white');
+    $p->SetFillColor('white');
+    $graph->Add($p);
 }
 
 /**
  * Draw a reference curve on a given graph
  */
-function _add_official_curve( &$graph, &$moments, &$values, $bgcolor, $line_color, $name) {
-  $p = new LinePlot( $values, $moments);
-  $p->SetColor( $line_color);
-	if ($bgcolor) {
-  	$p->SetFillColor( $bgcolor);
-	}
-	$p->SetWeight( 2);
-	//$p->SetLegend( $name);
-  $graph->Add( $p);
+function _add_official_curve(&$graph, &$moments, &$values, $bgcolor, $line_color, $name)
+{
+    $p = new LinePlot($values, $moments);
+    $p->SetColor($line_color);
+    if ($bgcolor) {
+        $p->SetFillColor($bgcolor);
+    }
+    $p->SetWeight(2);
+    //$p->SetLegend( $name);
+    $graph->Add($p);
 }
 
 /**
  * Select the ref-curve to use based on the gender of the child
  */
-function _select_ref_curve( $gender) {
-  // TODO: get the curve_id based on the type of child (e.g. ethnic background)
-  if (is_numeric($gender)) {
-    $ref_id = $gender;
-  } else {
-		// TODO: some other way of selecting
-    //$ref_id = ($gender == 'm' ? 1 : 2); // Made-up
-    //$ref_id = ($gender == 'm' ? 3 : 4); // SK
-    //$ref_id = ($gender == 'm' ? 5 : 6); // WHO 2006
-    //$ref_id = ($gender == 'm' ? 7 : 8); // WHO 2006 incl. 24 maanden
-    $ref_id = ($gender == 'm' ? 20 : 21); // WHO 2006 incl. 5 year, computer read
-  }
-  $ref_curve = get_ref_curve($ref_id);
-	return $ref_curve;
+function _select_ref_curve($gender)
+{
+    // TODO: get the curve_id based on the type of child (e.g. ethnic background)
+    if (is_numeric($gender)) {
+        $ref_id = $gender;
+    } else {
+        // TODO: some other way of selecting
+        //$ref_id = ($gender == 'm' ? 1 : 2); // Made-up
+        //$ref_id = ($gender == 'm' ? 3 : 4); // SK
+        //$ref_id = ($gender == 'm' ? 5 : 6); // WHO 2006
+        //$ref_id = ($gender == 'm' ? 7 : 8); // WHO 2006 incl. 24 maanden
+        $ref_id = ($gender == 'm' ? 20 : 21); // WHO 2006 incl. 5 year, computer read
+    }
+    $ref_curve = get_ref_curve($ref_id);
+    return $ref_curve;
 }
 
 /* We have to put it somewhere, and for now it's hight enough */
@@ -1604,359 +1665,371 @@ define("MAX_INT", 2147483647);
 /**
  * Add the reference curves to the graph
  */
-function _add_official_curves( &$graph, $gender, $type, $age, &$max_value, &$min_value) {
-	$ref_curve = _select_ref_curve( $gender);
+function _add_official_curves(&$graph, $gender, $type, $age, &$max_value, &$min_value)
+{
+    $ref_curve = _select_ref_curve($gender);
 
-	// The official curve and it's relatives
-	$date_of_birth = _get_ref_first_measurement( $ref_curve->curve_id, $type);
+    // The official curve and it's relatives
+    $date_of_birth = _get_ref_first_measurement($ref_curve->curve_id, $type);
 
-	$gs = _get_graph_sizes( $age);
+    $gs = _get_graph_sizes($age);
 
-	$ref_id = $ref_curve->curve_id;
-	// Create a array so we can read the ref_curve's meaning (+3 or +2 etc. etc.)
-	$rg_ref_curve = object2array( $ref_curve);
+    $ref_id = $ref_curve->curve_id;
+    // Create a array so we can read the ref_curve's meaning (+3 or +2 etc. etc.)
+    $rg_ref_curve = object2array($ref_curve);
 
-	// Make this different for length and weight
-	global $ref_curves_groups;
-	if ($type == "weight") {
-		$ref_curves_groups = floor($ref_curve->nr_of_weight_lines / 2);
-	} else {
-		$ref_curves_groups = floor($ref_curve->nr_of_length_lines / 2);
-	}
-  // TODO: make-up better colors
-	//$line_colors = array(-3 => 'lightgray', -2 => 'gray', -1 => 'seashell4', 0 => 'black', 1 => 'seashell4', 2 => 'gray', 3 => 'lightgray');
-  $line_colors = array(-3 => 'black', -2 => 'black', -1 => 'black', 0 => 'black', 1 => 'black', 2 => 'black', 3 => 'black');
-	$max_value = 0;
-	$min_value = MAX_INT;
-	for( $grp = -$ref_curves_groups; $grp <= $ref_curves_groups ; $grp++) {
-    if ($grp < 0) {
-      $str_grp = 'm'.abs($grp);
+    // Make this different for length and weight
+    global $ref_curves_groups;
+    if ($type == "weight") {
+        $ref_curves_groups = floor($ref_curve->nr_of_weight_lines / 2);
     } else {
-      $str_grp = ''.$grp;
+        $ref_curves_groups = floor($ref_curve->nr_of_length_lines / 2);
     }
-    $value_field_name = $type.'_'.$str_grp;
+    // TODO: make-up better colors
+    //$line_colors = array(-3 => 'lightgray', -2 => 'gray', -1 => 'seashell4', 0 => 'black', 1 => 'seashell4', 2 => 'gray', 3 => 'lightgray');
+    $line_colors = array(-3 => 'black', -2 => 'black', -1 => 'black', 0 => 'black', 1 => 'black', 2 => 'black', 3 => 'black');
+    $max_value = 0;
+    $min_value = MAX_INT;
+    for ($grp = -$ref_curves_groups; $grp <= $ref_curves_groups; $grp++) {
+        if ($grp < 0) {
+            $str_grp = 'm' . abs($grp);
+        } else {
+            $str_grp = '' . $grp;
+        }
+        $value_field_name = $type . '_' . $str_grp;
 
-    $measurement_nominal = array();
-    $moments = array();
-    $result = db_query( "SELECT moment, $value_field_name FROM {growthcurve_ref_curves_measurements} WHERE curve_id = $ref_id AND NOT IsNull( $value_field_name) ORDER BY moment");
-    while ( $measurement = db_fetch_array($result)) {
-    	if ( $measurement[moment] > ( $date_of_birth + $gs->time_span)) {
-    		break;
-			}
-			if ($measurement[$value_field_name] > $max_value) {
-				$max_value = $measurement[$value_field_name];
-			}
-			if ($measurement[$value_field_name] < $min_value) {
-				$min_value = $measurement[$value_field_name];
-			}
-      $measurement_nominal[] = $measurement[$value_field_name];
-      $moments[] = ( $measurement[moment] - $date_of_birth) / $gs->xunits;
+        $measurement_nominal = array();
+        $moments = array();
+        $result = db_query("SELECT moment, $value_field_name FROM {growthcurve_ref_curves_measurements} WHERE curve_id = $ref_id AND NOT IsNull( $value_field_name) ORDER BY moment");
+        while ($measurement = db_fetch_array($result)) {
+            if ($measurement[moment] > ($date_of_birth + $gs->time_span)) {
+                break;
+            }
+            if ($measurement[$value_field_name] > $max_value) {
+                $max_value = $measurement[$value_field_name];
+            }
+            if ($measurement[$value_field_name] < $min_value) {
+                $min_value = $measurement[$value_field_name];
+            }
+            $measurement_nominal[] = $measurement[$value_field_name];
+            $moments[] = ($measurement[moment] - $date_of_birth) / $gs->xunits;
+        }
+        //$bgcolor = ( $grp == -($ref_curves_groups) ? 'white' : (( abs( $grp) & 1) == 1 ? 'lightcyan' : 'aliceblue'));
+        $bgcolor = $grp >= -1 && $grp <= 0 ? "darkseagreen1" : "white";
+        _add_official_curve($graph, $moments, $measurement_nominal, $bgcolor, $line_colors[$grp], $rg_ref_curve['leg_' . $value_field_name]);
     }
-    //$bgcolor = ( $grp == -($ref_curves_groups) ? 'white' : (( abs( $grp) & 1) == 1 ? 'lightcyan' : 'aliceblue'));
-		$bgcolor = $grp >= -1 && $grp <= 0 ? "darkseagreen1" : "white";
-    _add_official_curve( $graph, $moments, $measurement_nominal, $bgcolor, $line_colors[$grp], $rg_ref_curve['leg_'.$value_field_name]);
-  }
-	// TODO: make this a link? (Using a Image-map??)
-	$graph->footer->left->Set( t( "Source: %source", array( '%source' => $ref_curve->name))." (http://www.borstvoeding.com)");
-	$graph->footer->left->SetFont( FF_ARIAL, FS_BOLD, 8);
-	$graph->footer->left->SetColor( "firebrick");
-	// TODO: copyrights?
-	$graph->footer->right->Set( t( "(c): %copyright", array( '%copyright' => 'WHO')));
-	$graph->footer->right->SetFont( FF_ARIAL, FS_BOLD, 8);
-	$graph->footer->right->SetColor( "black");
-  return $gs;
+    // TODO: make this a link? (Using a Image-map??)
+    $graph->footer->left->Set(t("Source: %source", array('%source' => $ref_curve->name)) . " (http://www.borstvoeding.com)");
+    $graph->footer->left->SetFont(FF_ARIAL, FS_BOLD, 8);
+    $graph->footer->left->SetColor("firebrick");
+    // TODO: copyrights?
+    $graph->footer->right->Set(t("(c): %copyright", array('%copyright' => 'WHO')));
+    $graph->footer->right->SetFont(FF_ARIAL, FS_BOLD, 8);
+    $graph->footer->right->SetColor("black");
+    return $gs;
 }
 
 /**
  * Add the weight curve of the required child to the given image
  */
-function _add_childs_curve( $child_id, $type, $xunits, $lineColor = 'black') {
-  // Get the data
-  $date_of_birth = _get_child_date_of_birth( $child_id);
-  $result = db_query( "SELECT moment, $type FROM {growthcurve_measurements} WHERE child_id = %d AND NOT IsNull( $type) ORDER BY moment", $child_id);
-  $measurements = array();
-  $moments = array();
-  while ( $measurement = db_fetch_array($result)) {
-    // TODO: make more than one range possible (for now only first year)
-    // Max show 18 years
-    if ( $measurement[moment] > ( $date_of_birth + 567648000)) {
-      // day 24 * 60 * 60: 86400
-      // big year in sec: 400 * 24 * 60 * 60: 34560000
-      // about two years: ((365 * 2) + 31) * 24 * 60 * 60: 65750400
-      break;
+function _add_childs_curve($child_id, $type, $xunits, $lineColor = 'black')
+{
+    // Get the data
+    $date_of_birth = _get_child_date_of_birth($child_id);
+    $result = db_query("SELECT moment, $type FROM {growthcurve_measurements} WHERE child_id = %d AND NOT IsNull( $type) ORDER BY moment", $child_id);
+    $measurements = array();
+    $moments = array();
+    while ($measurement = db_fetch_array($result)) {
+        // TODO: make more than one range possible (for now only first year)
+        // Max show 18 years
+        if ($measurement[moment] > ($date_of_birth + 567648000)) {
+            // day 24 * 60 * 60: 86400
+            // big year in sec: 400 * 24 * 60 * 60: 34560000
+            // about two years: ((365 * 2) + 31) * 24 * 60 * 60: 65750400
+            break;
+        }
+        $measurements[] = $measurement[$type];
+        $moments[] = ($measurement[moment] - $date_of_birth) / $xunits;
     }
-    $measurements[] = $measurement[$type];
-    $moments[] = ( $measurement[moment] - $date_of_birth) / $xunits;
-  }
-  if ( count( $measurements) <= 0) {
-    // Make sure we have at least one measurement
-    $measurements[] = 0;
-    $moments[] = 0;
-  }
-  $p = new LinePlot( $measurements, $moments);
-  $p->SetColor( $lineColor);
-  $p->mark->SetType( MARK_FILLEDCIRCLE);
-  $p->mark->SetFillColor( $lineColor);
-  $p->mark->SetWidth( 4);
-	$p->SetWeight( 4);
-  return $p;
+    if (count($measurements) <= 0) {
+        // Make sure we have at least one measurement
+        $measurements[] = 0;
+        $moments[] = 0;
+    }
+    $p = new LinePlot($measurements, $moments);
+    $p->SetColor($lineColor);
+    $p->mark->SetType(MARK_FILLEDCIRCLE);
+    $p->mark->SetFillColor($lineColor);
+    $p->mark->SetWidth(4);
+    $p->SetWeight(4);
+    return $p;
 }
 
-function _get_child_date_of_birth( $child_id) {
-  $child = _get_child($child_id);
-  return $child->dob;
+function _get_child_date_of_birth($child_id)
+{
+    $child = _get_child($child_id);
+    return $child->dob;
 }
 
-function _get_ref_first_measurement( $curve_id, $type) {
-  $x_min = db_fetch_object( db_query( 'SELECT MIN( moment) AS moment FROM {growthcurve_ref_curves_measurements} WHERE curve_id = %d AND NOT IsNull( %s_0)', $curve_id, $type));
-  return $x_min->moment;
+function _get_ref_first_measurement($curve_id, $type)
+{
+    $x_min = db_fetch_object(db_query('SELECT MIN( moment) AS moment FROM {growthcurve_ref_curves_measurements} WHERE curve_id = %d AND NOT IsNull( %s_0)', $curve_id, $type));
+    return $x_min->moment;
 }
 
 
-function _add_graph_error( &$graph, $message) {
-	$caption = new Text( $message, 80, 120);
-	$caption->SetFont( FF_ARIAL, FS_BOLD, 16);
-	$caption->SetColor( 'red');
-	$graph->AddText( $caption);
-	// Add empty plot...
-	_add_dummy_curve( $graph);
+function _add_graph_error(&$graph, $message)
+{
+    $caption = new Text($message, 80, 120);
+    $caption->SetFont(FF_ARIAL, FS_BOLD, 16);
+    $caption->SetColor('red');
+    $graph->AddText($caption);
+    // Add empty plot...
+    _add_dummy_curve($graph);
 }
 
-function _add_graph_not_found_error( &$graph) {
-  _add_graph_error( $graph, t('No child found with the given number'));
+function _add_graph_not_found_error(&$graph)
+{
+    _add_graph_error($graph, t('No child found with the given number'));
 }
 
-function _add_graph_access_error( &$graph) {
-  _add_graph_error( $graph, t('This is not one of your children'));
+function _add_graph_access_error(&$graph)
+{
+    _add_graph_error($graph, t('This is not one of your children'));
 }
 
 
 /**
  * Create a standard way to format the legend between the two graphs
  */
-function _format_legend( &$legend) {
-  $legend->SetColor( 'navy');
-  $legend->SetFillColor( 'lightyellow@0.7');
-  $legend->SetLineWeight( 1);
-  $legend->SetFont( FF_ARIAL, FS_BOLD, 8);
-  $legend->SetShadow( 'gray@0.4', 3);
-  $legend->Pos( 0.1, 0.85, 'right', 'bottom');
+function _format_legend(&$legend)
+{
+    $legend->SetColor('navy');
+    $legend->SetFillColor('lightyellow@0.7');
+    $legend->SetLineWeight(1);
+    $legend->SetFont(FF_ARIAL, FS_BOLD, 8);
+    $legend->SetShadow('gray@0.4', 3);
+    $legend->Pos(0.1, 0.85, 'right', 'bottom');
 }
 
-function get_max_age() {
-	global $user;
-	$result = db_query( "SELECT child_id, name FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
-	$max_age = 0;
-	while ($child = db_fetch_array($result)) {
-		$age = get_time_span_entered( $child['child_id']);
-		if ($age > $max_age) {
-			$max_age = $age;
-		}
-	}
-	return $max_age;
+function get_max_age()
+{
+    global $user;
+    $result = db_query("SELECT child_id, name FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
+    $max_age = 0;
+    while ($child = db_fetch_array($result)) {
+        $age = get_time_span_entered($child['child_id']);
+        if ($age > $max_age) {
+            $max_age = $age;
+        }
+    }
+    return $max_age;
 }
 
 /**
  * Setup the axis scale
  */
-function _setup_axis_scale(&$graph, $time_span, $max_y, $min_y) {
-	switch ($time_span) {
-		case TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 52);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-			$graph->xaxis->SetTitle( t('weeks'));
-			break;
-		case 2 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 2 * 52);
-			$graph->xaxis->scale->ticks->Set(5, 1);
-			$graph->xaxis->SetTitle( t('weeks'));
-			break;
-		case 4 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 4 * 12);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-  		$graph->xaxis->SetTitle( t('months'));
-			break;
-		case 5 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 5 * 12);
-			$graph->xaxis->scale->ticks->Set(4, 1);
-  		$graph->xaxis->SetTitle( t('months'));
-			break;
-		case 8 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 8);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-  		$graph->xaxis->SetTitle( t('years'));
-			break;
-		case 18 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 18);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-			$graph->xaxis->SetTitle( t('years'));
-			break;
-		default:
-			watchdog( 'gc', 'Error setting axis scale, unknown timespan:'.$time_span.', default to 18 years.');
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 18);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-			$graph->xaxis->SetTitle( t('years'));
-			break;
-	}
+function _setup_axis_scale(&$graph, $time_span, $max_y, $min_y)
+{
+    switch ($time_span) {
+        case TS_YEAR:
+            $graph->SetScale('linlin', $min_y, $max_y, 0, 52);
+            $graph->xaxis->scale->ticks->Set(2, 1);
+            $graph->xaxis->SetTitle(t('weeks'));
+            break;
+        case 2 * TS_YEAR:
+            $graph->SetScale('linlin', $min_y, $max_y, 0, 2 * 52);
+            $graph->xaxis->scale->ticks->Set(5, 1);
+            $graph->xaxis->SetTitle(t('weeks'));
+            break;
+        case 4 * TS_YEAR:
+            $graph->SetScale('linlin', $min_y, $max_y, 0, 4 * 12);
+            $graph->xaxis->scale->ticks->Set(2, 1);
+            $graph->xaxis->SetTitle(t('months'));
+            break;
+        case 5 * TS_YEAR:
+            $graph->SetScale('linlin', $min_y, $max_y, 0, 5 * 12);
+            $graph->xaxis->scale->ticks->Set(4, 1);
+            $graph->xaxis->SetTitle(t('months'));
+            break;
+        case 8 * TS_YEAR:
+            $graph->SetScale('linlin', $min_y, $max_y, 0, 8);
+            $graph->xaxis->scale->ticks->Set(2, 1);
+            $graph->xaxis->SetTitle(t('years'));
+            break;
+        case 18 * TS_YEAR:
+            $graph->SetScale('linlin', $min_y, $max_y, 0, 18);
+            $graph->xaxis->scale->ticks->Set(2, 1);
+            $graph->xaxis->SetTitle(t('years'));
+            break;
+        default:
+            watchdog('gc', 'Error setting axis scale, unknown timespan:' . $time_span . ', default to 18 years.');
+            $graph->SetScale('linlin', $min_y, $max_y, 0, 18);
+            $graph->xaxis->scale->ticks->Set(2, 1);
+            $graph->xaxis->SetTitle(t('years'));
+            break;
+    }
 }
 
 /**
  * Create the image of the weight curve
  */
-function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0) {
-  // Load the lib
-  include( JP_PATH."/jpgraph.php");
-  include( JP_PATH."/jpgraph_line.php");
+function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0)
+{
+    // Load the lib
+    include(JP_PATH . "/jpgraph.php");
+    include(JP_PATH . "/jpgraph_line.php");
 
-	isHTMLOutput(false);
+    isHTMLOutput(false);
 
-	$graphWidth = 600;
-	$graphHeight = 400;
-  if ($big == 1) {
-		$graphWidth = 1024;
-		$graphHeight = 768;
-	}
-  $graph = new Graph( $graphWidth, $graphHeight, 'gc_weight_'.$child_id.'.png', 1);
-  $graph->SetScale( "linlin");
-  
-  $graph->img->SetMargin( 55, 120, 40, 40);
-  $graph->SetShadow(false);
-  $graph->SetGridDepth(DEPTH_FRONT);
-  
-  // TODO: this should be a system setting
-  $lineColors = array( 'red', 'lightgreen', 'magenta2', 'mediumblue', 'mediumseagreen', 'orangered');
-  if ( $child_id == 'all') {
-    // Add the official graphs
-    $gs = _add_official_curves( $graph, 'm', 'weight', get_max_age(), &$max_weight, &$min_weight);
-    $graph->title->Set(t('Growth curve of all your children'));
-    global $user;
-    $result = db_query( "SELECT child_id, name FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
-    $i = 0;
-    $p = array(); // We need some array because the Add-function needs a reference
-    while ($child = db_fetch_array($result)) {
-      // Add the curve
-      $p[$i] = _add_childs_curve( $child['child_id'], 'weight', $gs->xunits, $lineColors[$i%5]);
-      $p[$i]->SetLegend( $child['name']);
-      $graph->Add( $p[$i]);
-      $i++;
+    $graphWidth = 600;
+    $graphHeight = 400;
+    if ($big == 1) {
+        $graphWidth = 1024;
+        $graphHeight = 768;
     }
-  } else if ($child_id == 'reference') {
-    // Show only the reference-curve
-    $gs = _add_official_curves( $graph, $ref_curve_id, 'weight', MAX_REF_CURVE_AGE, &$max_weight, &$min_weight);
-  } else {
-		$child = _CheckAccess( $child_id);
-		if ($child == CHILDNOTFOUND) {
-			_add_graph_not_found_error( $graph);
-			$graph->Stroke();
-			return;
-		} else if ($child == NOTYOURCHILD) {
-			_add_graph_access_error( $graph);
-			$graph->Stroke();
-			return;
-		} else {
-			// Add the official graphs
-			$age = get_time_span_entered( $child_id);
-			$gs = _add_official_curves( $graph, $child->gender, 'weight', $age, &$max_weight, &$min_weight);
-			$graph->title->Set( t('Weight growth curve for %name', array( '%name' => $child->name)));
-			$p = _add_childs_curve( $child_id, 'weight', $gs->xunits, $lineColors[ 0]);
-			$p->SetLegend( $child->name);
-			$graph->Add($p);
-		}
-  }
-  // Round to multiple of 100
-  $max_weight = $max_weight + (100 - ($max_weight % 100));
-  _setup_axis_scale(&$graph, $gs->time_span, $max_weight, 0);
-  $graph->yaxis->scale->ticks->Set(($big == 1) ? 1000 : 2000, 500);
+    $graph = new Graph($graphWidth, $graphHeight, 'gc_weight_' . $child_id . '.png', 1);
+    $graph->SetScale("linlin");
 
-  $graph->title->SetFont( FF_ARIAL, FS_BOLD, 16);
-  // Setup the axis
-  $graph->yaxis->SetTitle( t('grams'));
-  $graph->yaxis->SetTitlemargin( 40);
-  // Setup the grid
-  $graph->xgrid->Show();
-  $graph->ygrid->Show();
-  // Format the legend box
-  _format_legend( $graph->legend);
-  $graph->Stroke();
-  // and clear image from memory
+    $graph->img->SetMargin(55, 120, 40, 40);
+    $graph->SetShadow(false);
+    $graph->SetGridDepth(DEPTH_FRONT);
+
+    // TODO: this should be a system setting
+    $lineColors = array('red', 'lightgreen', 'magenta2', 'mediumblue', 'mediumseagreen', 'orangered');
+    if ($child_id == 'all') {
+        // Add the official graphs
+        $gs = _add_official_curves($graph, 'm', 'weight', get_max_age(), &$max_weight, &$min_weight);
+        $graph->title->Set(t('Growth curve of all your children'));
+        global $user;
+        $result = db_query("SELECT child_id, name FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
+        $i = 0;
+        $p = array(); // We need some array because the Add-function needs a reference
+        while ($child = db_fetch_array($result)) {
+            // Add the curve
+            $p[$i] = _add_childs_curve($child['child_id'], 'weight', $gs->xunits, $lineColors[$i % 5]);
+            $p[$i]->SetLegend($child['name']);
+            $graph->Add($p[$i]);
+            $i++;
+        }
+    } else if ($child_id == 'reference') {
+        // Show only the reference-curve
+        $gs = _add_official_curves($graph, $ref_curve_id, 'weight', MAX_REF_CURVE_AGE, &$max_weight, &$min_weight);
+    } else {
+        $child = _CheckAccess($child_id);
+        if ($child == CHILDNOTFOUND) {
+            _add_graph_not_found_error($graph);
+            $graph->Stroke();
+            return;
+        } else if ($child == NOTYOURCHILD) {
+            _add_graph_access_error($graph);
+            $graph->Stroke();
+            return;
+        } else {
+            // Add the official graphs
+            $age = get_time_span_entered($child_id);
+            $gs = _add_official_curves($graph, $child->gender, 'weight', $age, &$max_weight, &$min_weight);
+            $graph->title->Set(t('Weight growth curve for %name', array('%name' => $child->name)));
+            $p = _add_childs_curve($child_id, 'weight', $gs->xunits, $lineColors[0]);
+            $p->SetLegend($child->name);
+            $graph->Add($p);
+        }
+    }
+    // Round to multiple of 100
+    $max_weight = $max_weight + (100 - ($max_weight % 100));
+    _setup_axis_scale(&$graph, $gs->time_span, $max_weight, 0);
+    $graph->yaxis->scale->ticks->Set(($big == 1) ? 1000 : 2000, 500);
+
+    $graph->title->SetFont(FF_ARIAL, FS_BOLD, 16);
+    // Setup the axis
+    $graph->yaxis->SetTitle(t('grams'));
+    $graph->yaxis->SetTitlemargin(40);
+    // Setup the grid
+    $graph->xgrid->Show();
+    $graph->ygrid->Show();
+    // Format the legend box
+    _format_legend($graph->legend);
+    $graph->Stroke();
+    // and clear image from memory
 }
 
 /**
  * Add the length curve of te required child to the given image
  */
-function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0) {
-  // Load the lib
-  include( JP_PATH."/jpgraph.php");
-  include( JP_PATH."/jpgraph_line.php");
-  
-	isHTMLOutput(false);
-  
-	$graphWidth = 600;
-	$graphHeight = 400;
-  if ($big == 1) {
-		$graphWidth = 1024;
-		$graphHeight = 768;
-	}
-	$graph = new Graph( $graphWidth, $graphHeight, 'gc_length_'.$child_id.'.png', 1);
-  $graph->SetScale( "linlin");
-  
-  $graph->img->SetMargin(55,120,40,40);
-  $graph->SetShadow(false);
-  $graph->SetGridDepth(DEPTH_FRONT);
-  
-  // TODO: this should be a system setting
-  $lineColors = array( 'red', 'lightgreen', 'magenta2', 'mediumblue', 'mediumseagreen', 'orangered');
-  if ( $child_id == 'all') {
-    // Add the official graphs based on this childs background
-    $gs = _add_official_curves( $graph, 'm', 'length', get_max_age(), &$max_length, &$min_length);
-    $graph->title->Set( t('Growth curve of all your children'));
-    global $user;
-    $result = db_query( "SELECT child_id, name FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
-    $i = 0;
-    $p = array(); // We need some array because the Add-function needs a reference
-    while ($child = db_fetch_array($result)) {
-      // Add the curve
-      $p[$i] = _add_childs_curve( $child['child_id'], 'length', $gs->xunits, $lineColors[$i%5]);
-      $p[$i]->SetLegend( $child['name']);
-      $graph->Add( $p[$i]);
-      $i++;
+function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0)
+{
+    // Load the lib
+    include(JP_PATH . "/jpgraph.php");
+    include(JP_PATH . "/jpgraph_line.php");
+
+    isHTMLOutput(false);
+
+    $graphWidth = 600;
+    $graphHeight = 400;
+    if ($big == 1) {
+        $graphWidth = 1024;
+        $graphHeight = 768;
     }
-  } else if ($child_id == 'reference') {
-    // Show only the reference-curve
-    _add_official_curves( $graph, $ref_curve_id, 'length', MAX_REF_CURVE_AGE, &$max_length, &$min_length);
-  } else {
-		$child = _CheckAccess( $child_id);
-    if ($child == CHILDNOTFOUND) {
-			_add_graph_not_found_error( $graph);
-    } else if ($child == NOTYOURCHILD) {
-			_add_graph_access_error( $graph);
-		} else {
-			$age = get_time_span_entered( $child_id);
-			// Add the official graphs based on this childs background
-			$gs = _add_official_curves( $graph, $child->gender, 'length', $age, &$max_length, &$min_length);
-			$graph->title->Set( t('Length growth curve for %name', array( '%name' => $child->name)));
-			$p = _add_childs_curve( $child_id, 'length', $gs->xunits, $lineColors[ 0]);
-			$p->SetLegend( $child->name);
-			$graph->Add($p);
-		}
-  }
-	// Round to multiple of 10
-	$max_length = $max_length + (10 - ($max_length % 10));
-	$min_length = $min_length - (($min_length % 10) + 1);
-	_setup_axis_scale(&$graph, $gs->time_span, $max_length, $min_length);
-	$graph->yaxis->scale->ticks->Set(4, 2);
-  // Output graph
-	$graph->title->SetFont( FF_ARIAL, FS_BOLD, 16);
-  // Setup the axis
-  $graph->yaxis->SetTitle( t('cms'));
-  $graph->yaxis->SetTitlemargin( 40);
-  // Setup the grid
-  $graph->xgrid->Show();
-  $graph->ygrid->Show();
-  // Format the legend box
-	_format_legend( $graph->legend);
-  $graph->Stroke();
-  // and clear image from memory
+    $graph = new Graph($graphWidth, $graphHeight, 'gc_length_' . $child_id . '.png', 1);
+    $graph->SetScale("linlin");
+
+    $graph->img->SetMargin(55, 120, 40, 40);
+    $graph->SetShadow(false);
+    $graph->SetGridDepth(DEPTH_FRONT);
+
+    // TODO: this should be a system setting
+    $lineColors = array('red', 'lightgreen', 'magenta2', 'mediumblue', 'mediumseagreen', 'orangered');
+    if ($child_id == 'all') {
+        // Add the official graphs based on this childs background
+        $gs = _add_official_curves($graph, 'm', 'length', get_max_age(), &$max_length, &$min_length);
+        $graph->title->Set(t('Growth curve of all your children'));
+        global $user;
+        $result = db_query("SELECT child_id, name FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $user->uid);
+        $i = 0;
+        $p = array(); // We need some array because the Add-function needs a reference
+        while ($child = db_fetch_array($result)) {
+            // Add the curve
+            $p[$i] = _add_childs_curve($child['child_id'], 'length', $gs->xunits, $lineColors[$i % 5]);
+            $p[$i]->SetLegend($child['name']);
+            $graph->Add($p[$i]);
+            $i++;
+        }
+    } else if ($child_id == 'reference') {
+        // Show only the reference-curve
+        _add_official_curves($graph, $ref_curve_id, 'length', MAX_REF_CURVE_AGE, &$max_length, &$min_length);
+    } else {
+        $child = _CheckAccess($child_id);
+        if ($child == CHILDNOTFOUND) {
+            _add_graph_not_found_error($graph);
+        } else if ($child == NOTYOURCHILD) {
+            _add_graph_access_error($graph);
+        } else {
+            $age = get_time_span_entered($child_id);
+            // Add the official graphs based on this childs background
+            $gs = _add_official_curves($graph, $child->gender, 'length', $age, &$max_length, &$min_length);
+            $graph->title->Set(t('Length growth curve for %name', array('%name' => $child->name)));
+            $p = _add_childs_curve($child_id, 'length', $gs->xunits, $lineColors[0]);
+            $p->SetLegend($child->name);
+            $graph->Add($p);
+        }
+    }
+    // Round to multiple of 10
+    $max_length = $max_length + (10 - ($max_length % 10));
+    $min_length = $min_length - (($min_length % 10) + 1);
+    _setup_axis_scale(&$graph, $gs->time_span, $max_length, $min_length);
+    $graph->yaxis->scale->ticks->Set(4, 2);
+    // Output graph
+    $graph->title->SetFont(FF_ARIAL, FS_BOLD, 16);
+    // Setup the axis
+    $graph->yaxis->SetTitle(t('cms'));
+    $graph->yaxis->SetTitlemargin(40);
+    // Setup the grid
+    $graph->xgrid->Show();
+    $graph->ygrid->Show();
+    // Format the legend box
+    _format_legend($graph->legend);
+    $graph->Stroke();
+    // and clear image from memory
 }
 
 /**
@@ -1964,12 +2037,12 @@ function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0) 
  */
 function _linksToDateToCheck($child_id)
 {
-  return t('you might want to fix this <a href="%child_url">by changing '
-           .'the birthdate here</a> or '
-           .'you can check <a href="%measurem_url">the measurements here</a>.',
-           array('%child_url' => url('growthcurve/edit/'.$child_id.'/date'),
-                 '%measurem_url' => url('growthcurve/measurements/'.$child_id.'/first')));
-  // TODO: maybe add a way to hide this message?
+    return t('you might want to fix this <a href="%child_url">by changing '
+            . 'the birthdate here</a> or '
+            . 'you can check <a href="%measurem_url">the measurements here</a>.',
+        array('%child_url' => url('growthcurve/edit/' . $child_id . '/date'),
+            '%measurem_url' => url('growthcurve/measurements/' . $child_id . '/first')));
+    // TODO: maybe add a way to hide this message?
 }
 
 /**
@@ -1979,7 +2052,7 @@ function _linksToDateToCheck($child_id)
  */
 function CheckDOBAndFirstMeasurementDiff($child)
 {
-  $sql = 'SELECT '
+    $sql = 'SELECT '
         . ' min_moment - dob as diff_raw'
         . ' FROM ( SELECT min( moment ) as min_moment, dob'
         . '        FROM {growthcurve_measurements} m '
@@ -1988,97 +2061,100 @@ function CheckDOBAndFirstMeasurementDiff($child)
         . ' WHERE c.child_id = %d '
         . ' GROUP BY c.child_id '
         . ' ) find_dobs ';
-  $result = db_query($sql, $child->child_id);
-  $diffs = db_fetch_array($result);
-  if (0 + $diffs['diff_raw'] < -(5 * 60 * 60)) {
-    // Given DOB is after the first measurement, this does not make sense
-    drupal_set_message(t('You have measurements before the birthdate you gave, ').
-                       _linksToDateToCheck($child->child_id),
-                       'warning');
-  } elseif (0 + $diffs['diff_raw'] > (2 * 7 * 24 * 60 * 60)) { // 2 weeks
-    // Given DOB is more than 2 weeks before the first measurement, this might be wrong
-    drupal_set_message(t('You have measurements starting more than 2 weeks after the birthdate you gave, ').
-                       _linksToDateToCheck($child->child_id),
-                       'warning');
-  }
+    $result = db_query($sql, $child->child_id);
+    $diffs = db_fetch_array($result);
+    if (0 + $diffs['diff_raw'] < -(5 * 60 * 60)) {
+        // Given DOB is after the first measurement, this does not make sense
+        drupal_set_message(t('You have measurements before the birthdate you gave, ') .
+                _linksToDateToCheck($child->child_id),
+            'warning');
+    } elseif (0 + $diffs['diff_raw'] > (2 * 7 * 24 * 60 * 60)) { // 2 weeks
+        // Given DOB is more than 2 weeks before the first measurement, this might be wrong
+        drupal_set_message(t('You have measurements starting more than 2 weeks after the birthdate you gave, ') .
+                _linksToDateToCheck($child->child_id),
+            'warning');
+    }
 }
 
 /**
  *  growthcurve_view_curve
  */
-function growthcurve_view_curve($child_id = -1) {
-  if ( $child_id == 'all') {
-    $output = t('A view of all the children in one chart<br>');
-  } else {
-    if ( $child_id == -1) {
-    	$child_id = _get_first_child();
-			if ( !$child_id) {
-				print theme('page', t('Please add at least one child first') . '<br>' . _add_child_link());
-				return;
-			}
-		}
-		$child = _CheckAccess( $child_id);
-    if ($child == NOTYOURCHILD) {
-      _ErrorNotYourChild();
-      return;
+function growthcurve_view_curve($child_id = -1)
+{
+    if ($child_id == 'all') {
+        $output = t('A view of all the children in one chart<br>');
+    } else {
+        if ($child_id == -1) {
+            $child_id = _get_first_child();
+            if (!$child_id) {
+                print theme('page', t('Please add at least one child first') . '<br>' . _add_child_link());
+                return;
+            }
+        }
+        $child = _CheckAccess($child_id);
+        if ($child == NOTYOURCHILD) {
+            _ErrorNotYourChild();
+            return;
+        }
+        if ($child == CHILDNOTFOUND) {
+            _ErrorChildNotFound();
+            return;
+        }
+        $output = t('The growth curves of %name<br>', array('%name' => $child->name));
+        CheckDOBAndFirstMeasurementDiff($child);
     }
-    if ($child == CHILDNOTFOUND) {
-      _ErrorChildNotFound();
-      return;
+    // See if we can at all display a ref-curve...
+    $ref_curve = _select_ref_curve($child->gender);
+    $output .= '<table width="100%" id="graphs">' .
+        '<tbody>';
+    if ($ref_curve->nr_of_weight_lines > 0) {
+        $output .= "<tr><td>" . t('The weights') . "</td></tr><tr><td>\n";
+        $title = t('%name\'s weight curve', array('%name' => $child->name));
+        $graphUrl = url('growthcurve/curve_weight/' . $child_id);
+        $output .= '<a href="' . $graphUrl . '/-1/1">';
+        $output .= '<img src="' . $graphUrl . '" alt="' . $title . '" title="' . $title . '">';
+        $output .= '</a>';
+        $output .= _GetGraphHint();
+        $output .= "\n</td>\n";
+        $output .= "</tr>\n";
     }
-    $output = t('The growth curves of %name<br>', array('%name' => $child->name));
-    CheckDOBAndFirstMeasurementDiff($child);
-  }
-	// See if we can at all display a ref-curve...
-	$ref_curve = _select_ref_curve( $child->gender);
-	$output .= '<table width="100%" id="graphs">'.
-							'<tbody>';
-	if ( $ref_curve->nr_of_weight_lines > 0) {
-		$output .= "<tr><td>".t('The weights')."</td></tr><tr><td>\n";
-		$title = t('%name\'s weight curve', array('%name' => $child->name));
-		$graphUrl = url('growthcurve/curve_weight/'.$child_id);
-		$output .= '<a href="'.$graphUrl.'/-1/1">';
-		$output .= '<img src="'.$graphUrl.'" alt="'.$title.'" title="'.$title.'">';
-		$output .= '</a>';
-		$output .= _GetGraphHint(); 
-		$output .= "\n</td>\n";
-		$output .= "</tr>\n";
-	}
-	if ( $ref_curve->nr_of_length_lines > 0) {
-		$output .= "<tr><td>".t('The lengths')."</td></tr><tr><td>\n";
-		$title = t('%name\'s length curve', array('%name' => $child->name));
-		$graphUrl = url('growthcurve/curve_length/'.$child_id);
-		$output .= '<a href="'.$graphUrl.'/-1/1">';
-		$output .= '<img src="'.$graphUrl.'" alt="'.$title.'" title="'.$title.'">';
-		$output .= '</a>';
-		$output .= _GetGraphHint(); 
-		$output .= "\n</td>\n";
-		$output .= "</tr>\n";
-	}
-	$output .= "<tr>\n";
-	$output .= "<td>".$ref_curve->details."\n</td>\n";
-	$output .= "</tr>\n";
-	$output .= '</tbody></table>';
-	$output .= "\n";
-  print theme('page', $output);
+    if ($ref_curve->nr_of_length_lines > 0) {
+        $output .= "<tr><td>" . t('The lengths') . "</td></tr><tr><td>\n";
+        $title = t('%name\'s length curve', array('%name' => $child->name));
+        $graphUrl = url('growthcurve/curve_length/' . $child_id);
+        $output .= '<a href="' . $graphUrl . '/-1/1">';
+        $output .= '<img src="' . $graphUrl . '" alt="' . $title . '" title="' . $title . '">';
+        $output .= '</a>';
+        $output .= _GetGraphHint();
+        $output .= "\n</td>\n";
+        $output .= "</tr>\n";
+    }
+    $output .= "<tr>\n";
+    $output .= "<td>" . $ref_curve->details . "\n</td>\n";
+    $output .= "</tr>\n";
+    $output .= '</tbody></table>';
+    $output .= "\n";
+    print theme('page', $output);
 }
 
-function growthcurve_clear_cache() {
-  watchdog( 'gc', 'clear cache');
-  cache_clear_all();
-  menu_rebuild();
-	// TODO: add delete * from {cache}...
-  drupal_goto('growthcurve');
+function growthcurve_clear_cache()
+{
+    watchdog('gc', 'clear cache');
+    cache_clear_all();
+    menu_rebuild();
+    // TODO: add delete * from {cache}...
+    drupal_goto('growthcurve');
 }
 
-function growthcurve_exit($destination = NULL) {
-	// This should only be there when we have HTML-output...
-	if ($destination != NULL) {
-		return;
-	}
-	if (isHTMLOutput()) {
-//		print "<p style=\"align: right;\"><span style=\"font-size: 8px;\"><a target=\"SourceForge\" href=\"http://sourceforge.net/projects/growthcurve\">Growthcurve</a> enabled site. See your children grow! ".'($Id: growthcurve.module,v 1.21 2007/11/21 23:59:46 gerke Exp $,$Name:  $)'."</span></p>\n";
-	}
+function growthcurve_exit($destination = NULL)
+{
+    // This should only be there when we have HTML-output...
+    if ($destination != NULL) {
+        return;
+    }
+    if (isHTMLOutput()) {
+        //		print "<p style=\"align: right;\"><span style=\"font-size: 8px;\"><a target=\"SourceForge\" href=\"http://sourceforge.net/projects/growthcurve\">Growthcurve</a> enabled site. See your children grow! ".'($Id: growthcurve.module,v 1.21 2007/11/21 23:59:46 gerke Exp $,$Name:  $)'."</span></p>\n";
+    }
 }
 
 require('FirePHPCore/FirePHP.class.php');
@@ -2086,126 +2162,133 @@ require('FirePHPCore/FirePHP.class.php');
 /*
  * Get the users based on an email address (or part of it)
  */
-function _getUsers($email) {
-	$result = db_query( "SELECT * FROM {users} WHERE mail LIKE '%s' ORDER BY name LIMIT 25", $email);
+function _getUsers($email)
+{
+    $result = db_query("SELECT * FROM {users} WHERE mail LIKE '%s' ORDER BY name LIMIT 25", $email);
 
-	$users = array();
-	while ($user = db_fetch_array($result)) {
-		$users[] = $user;
-	}
+    $users = array();
+    while ($user = db_fetch_array($result)) {
+        $users[] = $user;
+    }
 
-	return $users;
+    return $users;
 }
 
 /*
  * Get the users based on a username (or part of it)
  */
-function _getUsersByName($name) {
-	$result = db_query( "SELECT * FROM {users} WHERE name LIKE '%s' ORDER BY name LIMIT 25", $name);
+function _getUsersByName($name)
+{
+    $result = db_query("SELECT * FROM {users} WHERE name LIKE '%s' ORDER BY name LIMIT 25", $name);
 
-	$users = array();
-	while ($user = db_fetch_array($result)) {
-		$users[] = $user;
-	}
+    $users = array();
+    while ($user = db_fetch_array($result)) {
+        $users[] = $user;
+    }
 
-	return $users;
+    return $users;
 }
 
-function _getLogQuery($and_clause) {
-	$firephp = FirePHP::getInstance(true);
+function _getLogQuery($and_clause)
+{
+    $firephp = FirePHP::getInstance(true);
 
-	$qry = "select date_format(FROM_UNIXTIME(`timestamp`), '%a %d %m %Y %T') as date, "
-		."`wid`, `uid`, `type`, `message`, `severity`, `link`, `location`, "
-		."`hostname`, `timestamp` "
-		."from {watchdog} "
-		."where type = 'user' and " . $and_clause . " "
-		."order by `timestamp` DESC LIMIT 50";
-	$firephp->fb("The query", $qry, FirePHP::INFO);
-	return $qry;
-}
-
-/*
- * Get the messages based on source host address
- */
-function _getMessagesForHost($host) {
-	$result = db_query( _getLogQuery("`hostname` = '" . $host . "'"));
-
-	$messages = array();
-	while ($msg = db_fetch_array($result)) {
-		$messages[] = $msg;
-	}
-
-	return $messages;
+    $qry = "select date_format(FROM_UNIXTIME(`timestamp`), '%a %d %m %Y %T') as date, "
+        . "`wid`, `uid`, `type`, `message`, `severity`, `link`, `location`, "
+        . "`hostname`, `timestamp` "
+        . "from {watchdog} "
+        . "where type = 'user' and " . $and_clause . " "
+        . "order by `timestamp` DESC LIMIT 50";
+    $firephp->fb("The query", $qry, FirePHP::INFO);
+    return $qry;
 }
 
 /*
  * Get the messages based on source host address
  */
-function _getMessagesForUser($uid) {
-	$result = db_query( _getLogQuery("`uid` = '" . $uid . "'"));
+function _getMessagesForHost($host)
+{
+    $result = db_query(_getLogQuery("`hostname` = '" . $host . "'"));
 
-	$messages = array();
-	while ($msg = db_fetch_array($result)) {
-		$messages[] = $msg;
-	}
+    $messages = array();
+    while ($msg = db_fetch_array($result)) {
+        $messages[] = $msg;
+    }
 
-	return $messages;
+    return $messages;
 }
 
-function _getChildrenForUser($uid) {
-	$result = db_query( "SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $uid);
+/*
+ * Get the messages based on source host address
+ */
+function _getMessagesForUser($uid)
+{
+    $result = db_query(_getLogQuery("`uid` = '" . $uid . "'"));
 
-	$children = array();
-	while ($child = db_fetch_array($result)) {
-		$children[] = $child;
-	}
+    $messages = array();
+    while ($msg = db_fetch_array($result)) {
+        $messages[] = $msg;
+    }
 
-	return $children;
+    return $messages;
+}
+
+function _getChildrenForUser($uid)
+{
+    $result = db_query("SELECT * FROM {growthcurve_children} WHERE uid = %d ORDER BY name", $uid);
+
+    $children = array();
+    while ($child = db_fetch_array($result)) {
+        $children[] = $child;
+    }
+
+    return $children;
 }
 
 /**
  * Find a user based on either the email-address or the host(ip-address) they mailed from
  */
-function growthcurve_user_search($email, $host = '') {
-	// Only the site admin is able to proceed here.
-	global $user;
-	if ($user->uid != 1) return;
+function growthcurve_user_search($email, $host = '')
+{
+    // Only the site admin is able to proceed here.
+    global $user;
+    if ($user->uid != 1) return;
 
-	isHTMLOutput(false);
+    isHTMLOutput(false);
 
-	//$firephp->fb('Log message');
-	//$firephp->fb('Info message', FirePHP::INFO);
-	//$firephp->fb('Warn message', FirePHP::WARN);
-	//$firephp->fb('Error message',FirePHP::ERROR); 
+    //$firephp->fb('Log message');
+    //$firephp->fb('Info message', FirePHP::INFO);
+    //$firephp->fb('Warn message', FirePHP::WARN);
+    //$firephp->fb('Error message',FirePHP::ERROR);
 
-	$users = _getUsers($email);
-	$users = array_merge($users, _getUsersByName($email));
+    $users = _getUsers($email);
+    $users = array_merge($users, _getUsersByName($email));
 
-	$firephp = FirePHP::getInstance(true);
-	$firephp->fb($users, FirePHP::INFO);
+    $firephp = FirePHP::getInstance(true);
+    $firephp->fb($users, FirePHP::INFO);
 
-	$first_user_uid = $users[0]['uid'];
-	if ($host != '') {
-		$firephp->fb($host, "Getting messages for host", FirePHP::INFO);
-		$messages = _getMessagesForHost($host);
-	} else {
-		$firephp->fb($users[0]['uid'], "Getting messages for user with uid", FirePHP::INFO);
-		if ($first_user_uid != 0) {
-			$messages = _getMessagesForUser($first_user_uid);
-		}
-	}
-	if ($first_user_uid != 0) {
-		$children = _getChildrenForUser($first_user_uid);
-		$firephp->fb($children, FirePHP::INFO);
-	}
-	$firephp->fb($messages, FirePHP::INFO);
+    $first_user_uid = $users[0]['uid'];
+    if ($host != '') {
+        $firephp->fb($host, "Getting messages for host", FirePHP::INFO);
+        $messages = _getMessagesForHost($host);
+    } else {
+        $firephp->fb($users[0]['uid'], "Getting messages for user with uid", FirePHP::INFO);
+        if ($first_user_uid != 0) {
+            $messages = _getMessagesForUser($first_user_uid);
+        }
+    }
+    if ($first_user_uid != 0) {
+        $children = _getChildrenForUser($first_user_uid);
+        $firephp->fb($children, FirePHP::INFO);
+    }
+    $firephp->fb($messages, FirePHP::INFO);
 
-	$info->users = $users;
-	$info->messages = $messages;
-	$info->children = $children;
-	$firephp->fb($info, FirePHP::INFO);
+    $info->users = $users;
+    $info->messages = $messages;
+    $info->children = $children;
+    $firephp->fb($info, FirePHP::INFO);
 
-	print json_encode($info);
+    print json_encode($info);
 }
 
 ?>
