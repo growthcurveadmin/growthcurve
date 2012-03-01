@@ -51,7 +51,7 @@ function show($data, $func = "print_r", $return_str = false)
     $func($data);
     $output = '<pre>' . htmlspecialchars(ob_get_contents()) . '</pre>';
     ob_end_clean();
-    if ($return_str) return $output; else echo $output;
+    if ($return_str) return $output; else { echo $output; return ''; }
 }
 
 require_once("growthcurve.config");
@@ -71,6 +71,8 @@ function isHTMLOutput($set = NULL)
 /**
  * This function will add some JavaScript that will set the focus to the given
  * input control.
+ * @param string $focus_field the number/name of the field to focus
+ * @return string the HTML-content for the field focus tric
  */
 function _SetFocusField($focus_field)
 {
@@ -91,10 +93,11 @@ function _SetFocusField($focus_field)
 
 /**
  * Return the help to give an over view of what can be done with this site.
+ * @return string the help message
  */
 function _help_info()
 {
-    return t("Welcome to Growth curve.<br> As this is the first time you use Growth cruve, I want to introduce the system to you in short.<br>At the top of this page.");
+    return t("Welcome to Growth curve.<br> As this is the first time you use Growth curve, I want to introduce the system to you in short.<br>At the top of this page.");
 }
 
 /**
@@ -126,7 +129,7 @@ function growthcurve_help_info()
 
 /**
  * Get the first ref curve according to a defined sort order
- * @return id of the first ref curve
+ * @return integer id of the first ref curve
  */
 function _get_first_ref_curve()
 {
@@ -139,7 +142,7 @@ function _get_first_ref_curve()
 
 /**
  * Get the first child according to a defined sort order
- * @return id of the first child
+ * @return integer id of the first child
  */
 function _get_first_child()
 {
@@ -163,6 +166,8 @@ function _add_child_link()
 
 /**
  * Implementation of hook_menu().
+ * @param boolean $may_cache should cache be used
+ * @return array a menu array
  */
 function growthcurve_menu($may_cache)
 {
@@ -363,9 +368,8 @@ define("NOTYOURCHILD", -2);
 
 /**
  * Check if the given child_id is of a child that is ours
- * @param child_id The ID of the child to check
- * @param strMsg The message to add to the Access-denied message to be more specific
- * @returns block HTML
+ * @param integer $child_id The ID of the child to check
+ * @return string|Child block HTML
  */
 function _CheckAccess($child_id)
 {
@@ -410,9 +414,9 @@ function _ErrorNotYourChild()
 
 /**
  * Generate HTML for the growthcurve block
- * @param op the operation from the URL
- * @param delta offset
- * @returns block HTML
+ * @param string $op the operation from the URL
+ * @param integer $delta offset
+ * @return array|string block HTML
  */
 function growthcurve_block($op = 'list', $delta = 0)
 {
@@ -421,10 +425,6 @@ function growthcurve_block($op = 'list', $delta = 0)
         $block[0]["info"] = t("Growth curve");
         return $block;
     } else {
-        // our block content
-        // content variable that will be returned for display
-        $block_content = '';
-
         // set up the block
         $block['subject'] = t('Growth curve');
 
@@ -457,7 +457,8 @@ function growthcurve_block($op = 'list', $delta = 0)
 } // end growthcurve_block
 
 /**
- *
+ * The reference curve list.
+ * @return string the HTML that represents the reference curve list
  */
 function growthcurve_ref_curve_list()
 {
@@ -499,7 +500,6 @@ function growthcurve_admin()
     }
     // What should be do?
     $op = $_POST['op'];
-    $edit = $_POST['edit'];
 
     if (empty($op)) {
         $op = arg(2);
@@ -533,7 +533,7 @@ function growthcurve_admin()
 
 /**
  * Generate HTML for the growthcurve configuration
- * @returns HTML for configuration-screen
+ * @return string HTML for configuration-screen
  */
 function growthcurve_settings()
 {
@@ -547,8 +547,18 @@ function growthcurve_settings()
     return $output;
 }
 
+class RefCurve {
+    var $curve_id;
+    var $name;
+    var $nr_of_length_lines;
+    var $nr_of_weight_lines;
+    var $gender;
+    var $details;
+}
+
 /**
- *
+ * @param integer $curve_id the curve id
+ * @return RefCurve the reference curve
  */
 function get_ref_curve($curve_id)
 {
@@ -556,7 +566,7 @@ function get_ref_curve($curve_id)
 }
 
 /**
- *
+ * @return string the hint to display next to a graph
  */
 function _GetGraphHint()
 {
@@ -564,7 +574,8 @@ function _GetGraphHint()
 }
 
 /**
- *
+ * @param string $ref_id
+ * @return string HTML that displays the reference curve
  */
 function growthcurve_admin_ref_view($ref_id = '')
 {
@@ -572,24 +583,24 @@ function growthcurve_admin_ref_view($ref_id = '')
         $ref_id = _get_first_ref_curve();
     }
 
-    $ref_cruve = get_ref_curve($ref_id);
+    $ref_curve = get_ref_curve($ref_id);
 
     // TODO: Show the ref-curve info
-    $output = "Reference curve: " . $ref_cruve->name . "<br>\n";
+    $output = "Reference curve: " . $ref_curve->name . "<br>\n";
 
-    $ref_cruve = _select_ref_curve($ref_id);
-    if ($ref_cruve->nr_of_weight_lines > 0) {
+    $ref_curve = _select_ref_curve($ref_id);
+    if ($ref_curve->nr_of_weight_lines > 0) {
         $output .= "The weights<br>\n";
-        $graphUrl = url('growthcurve/curve_weight/reference/' . $ref_cruve->curve_id);
+        $graphUrl = url('growthcurve/curve_weight/reference/' . $ref_curve->curve_id);
         $output .= '<a href="' . $graphUrl . '/1" title="' . t("Click to get a larger version") . '">';
         $output .= '<img src="' . $graphUrl . '" alt="Your weight reference curve" title="Your weight reference curve">';
         $output .= '</a>';
         $output .= _GetGraphHint();
         $output .= "\n<hr>\n";
     }
-    if ($ref_cruve->nr_of_length_lines > 0) {
+    if ($ref_curve->nr_of_length_lines > 0) {
         $output .= "The lengths<br>\n";
-        $graphUrl = url('growthcurve/curve_length/reference/' . $ref_cruve->curve_id);
+        $graphUrl = url('growthcurve/curve_length/reference/' . $ref_curve->curve_id);
         $output .= '<a href="' . $graphUrl . '/1" title="' . t("Click to get a larger version") . '">';
         $output .= '<img src="' . $graphUrl . '" alt="Your length reference curve" title="Your length reference curve">';
         $output .= '</a>';
@@ -621,7 +632,8 @@ function growthcurve_ref_curve_form($ref_curve)
 
 
 /**
- *
+ * @param RefCurve $ref_curve the created/editted reference curve
+ * @return \StdClass the validated reference curve
  */
 function growthcurve_ref_curve_validate($ref_curve)
 {
@@ -647,7 +659,9 @@ function growthcurve_ref_curve_validate($ref_curve)
 }
 
 /**
- *
+ * Save the reference curve
+ * @param RefCurve $ref_curve the reference curve to save
+ * @param integer $ref_id the id of that curve
  */
 function growthcurve_ref_curve_save($ref_curve, $ref_id)
 {
@@ -656,14 +670,14 @@ function growthcurve_ref_curve_save($ref_curve, $ref_id)
         //drupal_set_message( t('Reference curve %name(%id) updated.', array( '%name' => $ref_curve->name, '%id' => $ref_id)));
     }
     else {
-        global $user;
         db_query("INSERT INTO {growthcurve_ref_curves} (name, nr_of_weight_lines, nr_of_length_lines, gender, details) VALUES  ('%s', '%s', '%s', '%s')", $ref_curve->name, $ref_curve->nr_of_weight_lines, $ref_curve->nr_of_length_lines, $ref_curve->gender, $ref_curve->details);
         drupal_set_message(t('Reference curve %name added.', array('%name' => $ref_curve->name)));
     }
 }
 
 /**
- *
+ * @param string $ref_id the id of the reference curve
+ * @return string HTML to display the reference curve
  */
 function growthcurve_admin_ref_edit($ref_id = '')
 {
@@ -701,12 +715,12 @@ function growthcurve_admin_ref_edit($ref_id = '')
 function _get_field_names()
 {
     global $ref_curves_groups;
-    $fieldnames = '';
+    $field_names = '';
     $first = true;
     // Weight
     for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
         if (!$first) {
-            $fieldnames .= ', ';
+            $field_names .= ', ';
         } else {
             $first = false;
         }
@@ -716,12 +730,12 @@ function _get_field_names()
         } else {
             $field_name = 'weight_' . $grp;
         }
-        $fieldnames .= $field_name;
+        $field_names .= $field_name;
     }
     // Length
     for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
         if (!$first) {
-            $fieldnames .= ', ';
+            $field_names .= ', ';
         } else {
             $first = false;
         }
@@ -731,13 +745,14 @@ function _get_field_names()
         } else {
             $field_name = 'length_' . $grp;
         }
-        $fieldnames .= $field_name;
+        $field_names .= $field_name;
     }
-    return $fieldnames;
+    return $field_names;
 }
 
 /**
- *
+ * @param string $ref_id the id of the reference curve
+ * @return string HTML to display the measurements of a reference curve
  */
 function growthcurve_admin_ref_measurements($ref_id = '')
 {
@@ -746,12 +761,12 @@ function growthcurve_admin_ref_measurements($ref_id = '')
         $ref_id = _get_first_ref_curve();
     }
 
-    $ref_cruve = get_ref_curve($ref_id);
+    $ref_curve = get_ref_curve($ref_id);
     global $ref_curves_groups;
     // TODO: Take the highest of the two for now
-    $ref_curves_groups = floor(($ref_cruve->nr_of_weight_lines > $ref_cruve->nr_of_length_lines ? $ref_cruve->nr_of_weight_lines : $ref_cruve->nr_of_length_lines) / 2);
+    $ref_curves_groups = floor(($ref_curve->nr_of_weight_lines > $ref_curve->nr_of_length_lines ? $ref_curve->nr_of_weight_lines : $ref_curve->nr_of_length_lines) / 2);
 
-    $header_msg = "Measurements of the refcurve: " . $ref_cruve->name;
+    $header_msg = "Measurements of the refcurve: " . $ref_curve->name;
 
     $the_measurements = $_POST['edit'];
     $op = $_POST['op'];
@@ -801,7 +816,6 @@ function growthcurve_admin_ref_measurements($ref_id = '')
             $nr_del = 0;
             while ($the_measurements['date_' . $i]) {
                 // See what needs to be done
-                global $user;
                 if ($the_measurements['measurement_id_' . $i]) {
                     // Update or delete
                     if ('del' == $the_measurements['del_weight_' . $i]) {
@@ -852,14 +866,14 @@ function growthcurve_admin_ref_measurements($ref_id = '')
                 } else {
                     // Insert
                     //drupal_set_message( 'Insert new');
-                    $fieldnames = '';
-                    $fieldvalues = '';
+                    $field_names = '';
+                    $field_values = '';
                     $first = true;
                     // Weight
                     for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
                         if (!$first) {
-                            $fieldnames .= ', ';
-                            $fieldvalues .= ', ';
+                            $field_names .= ', ';
+                            $field_values .= ', ';
                         } else {
                             $first = false;
                         }
@@ -869,14 +883,14 @@ function growthcurve_admin_ref_measurements($ref_id = '')
                         } else {
                             $field_name = 'weight_' . $grp;
                         }
-                        $fieldnames .= $field_name;
-                        $fieldvalues .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
+                        $field_names .= $field_name;
+                        $field_values .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
                     }
                     // Length
                     for ($grp = -($ref_curves_groups); $grp <= $ref_curves_groups; $grp++) {
                         if (!$first) {
-                            $fieldnames .= ', ';
-                            $fieldvalues .= ', ';
+                            $field_names .= ', ';
+                            $field_values .= ', ';
                         } else {
                             $first = false;
                         }
@@ -886,10 +900,10 @@ function growthcurve_admin_ref_measurements($ref_id = '')
                         } else {
                             $field_name = 'length_' . $grp;
                         }
-                        $fieldnames .= $field_name;
-                        $fieldvalues .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
+                        $field_names .= $field_name;
+                        $field_values .= is_numeric($the_measurements[$field_name . '_' . $i]) ? $the_measurements[$field_name . '_' . $i] : 'NULL';
                     }
-                    db_query("INSERT INTO {growthcurve_ref_curves_measurements} (curve_id, moment, $fieldnames, comments) VALUES ( %d, '%s', $fieldvalues, '%s')",
+                    db_query("INSERT INTO {growthcurve_ref_curves_measurements} (curve_id, moment, $field_names, comments) VALUES ( %d, '%s', $field_values, '%s')",
                         $ref_id,
                         $the_measurements['conv_date_' . $i],
                         $the_measurements['comment_' . $i]);
@@ -917,7 +931,7 @@ function growthcurve_admin_ref_measurements($ref_id = '')
 /**
  * Generate HTML for the growthcurve overview
  * List all children this user want to keep track of
- * @returns HTML for overview-screen
+ * @return string HTML for overview-screen
  */
 function growthcurve_main_display()
 {
@@ -952,7 +966,7 @@ function growthcurve_main_display()
 
 /**
  *
- * @return the content to be redered on the client
+ * @return string the content to be redered on the client
  */
 function growthcurve_main_usermanager()
 {
@@ -969,10 +983,19 @@ function growthcurve_main()
     print theme('page', growthcurve_main_display());
 }
 
+class Child {
+    var $child_id;
+    var $name;
+    var $gender;
+    var $date;
+    var $story;
+    var $dob;
+}
+
 /**
  * Generate HTML for the child-add/edit screen
- * @param child child-object that should be displayed
- * @returns HTML for configuration-screen
+ * @param Child $child child-object that should be displayed
+ * @return mixed|string HTML for configuration-screen
  */
 function growthcurve_child_form($child)
 {
@@ -1037,8 +1060,8 @@ function form_validate_date($str_date, &$date)
 
 /**
  * This will validate a child-object that comes from a add/edit screen
- * @param child child-object that should be validated
- * @returns the validated child-object AND errors in the form-error-list
+ * @param Child/array $child child-object that should be validated
+ * @return Child the validated child-object AND errors in the form-error-list
  */
 function growthcurve_child_validate($child)
 {
@@ -1067,9 +1090,9 @@ function growthcurve_child_validate($child)
 
 /**
  * This will store/update a child-object in(to) the database
- * @param child child-object that should be stored/updated
- * @param child_id id of the child-record in the db (NULL -> create a new record)
- * @returns the validated child-object AND errors in the form-error-list
+ * @param Child $child child-object that should be stored/updated
+ * @param integer $child_id id of the child-record in the db (NULL -> create a new record)
+ * @returns Child the validated child-object AND errors in the form-error-list
  */
 function _growthcurve_child_save($child, $child_id = NULL)
 {
@@ -1118,7 +1141,8 @@ function _get_child($child_id)
 }
 
 /**
- *
+ * @param integer $child_id the id of the child
+ * @return integer the age of the child in seconds
  */
 function get_time_span_entered($child_id)
 {
@@ -1188,12 +1212,11 @@ function growthcurve_child_remove($child_id)
         return;
     }
 
-    $op = $_POST['op'];
-
     if ($_POST['edit']['confirm']) {
         db_query('DELETE FROM {growthcurve_children} WHERE child_id = %d', $child_id);
         drupal_set_message(t('The child %name has been removed from your list of children.', array('%name' => theme('placeholder', $child->name))));
         menu_rebuild();
+        $output = "Goto growthcurve";
         drupal_goto('growthcurve');
     }
     else {
@@ -1208,7 +1231,11 @@ function growthcurve_child_remove($child_id)
 }
 
 /**
- *
+ * Create a measurement row for adding it to a table
+ * @param array $measurement the measurement to add
+ * @param integer $i the id of the row
+ * @param bool $add_groups should groups be used
+ * @return array field array to add to the table
  */
 function _measurement_row($measurement, $i, $add_groups = false)
 {
@@ -1348,7 +1375,12 @@ function _validate_measurement(&$the_measurements, $i, $groups = false)
 }
 
 /**
- *   Build the page that contains the weights table
+ * Build the page that contains the weights table.
+ * @param string $header_msg the message to display in the header
+ * @param array $rows the rows to display in the table
+ * @param mixed|integer $field_to_focus the id of the row which has a mistake and should be focused
+ * @param bool $add_groups if groups should be added
+ * @return string HTML representing the weight table
  */
 function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups = false)
 {
@@ -1432,7 +1464,7 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
   }
   function undelete() {
     var nr_of_rows = document.getElementsByName( "edit[next_row_nr]");
-    for ( i = 0; i < nr_of_rows[ 0].value; i++) {
+    for ( var i = 0; i < nr_of_rows[ 0].value; i++) {
       var del = document.getElementsByName( "edit[del_weight_" + i + "]");
       del[ 0].value = "ok";
       // Now un-hide
@@ -1453,7 +1485,7 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
     var new_row = last_row.cloneNode( true);
     // appendChild to the tbody
     tbody.appendChild( new_row);
-    // Change the values/numbes
+    // Change the values/numbers
     // This would involve lots of searching in all those nice themed td/div/input elements... Lets not do so!
     // Add one
     nr_of_rows[ 0].value = nr_of_rows[ 0].value + 1;
@@ -1467,6 +1499,9 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
 
 /**
  * A screen for editing the measurements
+ * @param integer $child_id the id of the child
+ * @param mixed|string $field_to_focus the name of the field to focus
+ * @return string HTML that cotains the measurements table
  */
 function growthcurve_measurements($child_id = -1, $field_to_focus = NULL)
 {
@@ -1523,7 +1558,6 @@ function growthcurve_measurements($child_id = -1, $field_to_focus = NULL)
             $nr_del = 0;
             while ($the_measurements['date_' . $i] || ('del' == $the_measurements['del_weight_' . $i])) {
                 // See what needs to be done
-                global $user;
                 if ($the_measurements['measurement_id_' . $i]) {
                     // Update or delete
                     if ('del' == $the_measurements['del_weight_' . $i]) {
@@ -1583,7 +1617,10 @@ define("TS_ARG_MONTH", 2628000);
 // Year: 60 * 60 * 24 * 365 = 31536000
 define("TS_YEAR", 31536000);
 
-class GraphSizes {}
+class GraphSizes {
+    var $time_span;
+    var $xunits;
+}
 
 /**
  * What are the sizes to use in the graphs based on the age of the child.
@@ -1620,6 +1657,7 @@ function _get_graph_sizes($age)
 
 /**
  * Draw a dummy curve on a given graph
+ * @param Graph $graph the graph to add dummy curve to
  */
 function _add_dummy_curve(&$graph)
 {
@@ -1635,8 +1673,13 @@ function _add_dummy_curve(&$graph)
 
 /**
  * Draw a reference curve on a given graph
+ * @param Graph $graph the graph to add the official curve to
+ * @param array $moments the moments
+ * @param array $values the values
+ * @param string $bgcolor the background color under the line
+ * @param string $line_color the color of the line
  */
-function _add_official_curve(&$graph, &$moments, &$values, $bgcolor, $line_color, $name)
+function _add_official_curve(&$graph, &$moments, &$values, $bgcolor, $line_color)
 {
     $p = new LinePlot($values, $moments);
     $p->SetColor($line_color);
@@ -1644,12 +1687,13 @@ function _add_official_curve(&$graph, &$moments, &$values, $bgcolor, $line_color
         $p->SetFillColor($bgcolor);
     }
     $p->SetWeight(2);
-    //$p->SetLegend( $name);
     $graph->Add($p);
 }
 
 /**
  * Select the ref-curve to use based on the gender of the child
+ * @param mixed|string|integer $gender the id of the reference curve or the gender to select by
+ * @return RefCurve the reference curve
  */
 function _select_ref_curve($gender)
 {
@@ -1673,6 +1717,13 @@ define("MAX_INT", 2147483647);
 
 /**
  * Add the reference curves to the graph
+ * @param Graph $graph the graph to add the official curves to
+ * @param mixed|integer|string $gender the gender of the child
+ * @param string $type the type of reference curve to add (length|weight)
+ * @param integer $age the age of the child
+ * @param integer $max_value the top value in the graph
+ * @param integer $min_value the lowest values in the graph
+ * @return \GraphSizes the size the graph has
  */
 function _add_official_curves(&$graph, $gender, $type, $age, &$max_value, &$min_value)
 {
@@ -1690,9 +1741,9 @@ function _add_official_curves(&$graph, $gender, $type, $age, &$max_value, &$min_
     // Make this different for length and weight
     global $ref_curves_groups;
     if ($type == "weight") {
-        $ref_curves_groups = floor($ref_curve->nr_of_weight_lines / 2);
+        $ref_curves_groups = intval(floor($ref_curve->nr_of_weight_lines / 2));
     } else {
-        $ref_curves_groups = floor($ref_curve->nr_of_length_lines / 2);
+        $ref_curves_groups = intval(floor($ref_curve->nr_of_length_lines / 2));
     }
     // TODO: make-up better colors
     //$line_colors = array(-3 => 'lightgray', -2 => 'gray', -1 => 'seashell4', 0 => 'black', 1 => 'seashell4', 2 => 'gray', 3 => 'lightgray');
@@ -1740,6 +1791,11 @@ function _add_official_curves(&$graph, $gender, $type, $age, &$max_value, &$min_
 
 /**
  * Add the weight curve of the required child to the given image
+ * @param integer $child_id the id of the child
+ * @param string $type the type of reference curve to add (length|weight)
+ * @param integer $xunits the units on the X-axis expressed in seconds for that unit
+ * @param string $lineColor the color of the line
+ * @return \LinePlot the new plot to add to a graph
  */
 function _add_childs_curve($child_id, $type, $xunits, $lineColor = 'black')
 {
@@ -1787,6 +1843,11 @@ function _get_ref_first_measurement($curve_id, $type)
 }
 
 
+/**
+ * Add a message to a graph.
+ * @param Graph $graph the graph to add the official curve to
+ * @param string $message the message to add
+ */
 function _add_graph_error(&$graph, $message)
 {
     $caption = new Text($message, 80, 120);
@@ -1810,6 +1871,7 @@ function _add_graph_access_error(&$graph)
 
 /**
  * Create a standard way to format the legend between the two graphs
+ * @param Legend $legend the legend to format
  */
 function _format_legend(&$legend)
 {
@@ -1837,6 +1899,10 @@ function get_max_age()
 
 /**
  * Setup the axis scale
+ * @param Graph $graph the graph set the scale of
+ * @param integer $time_span the age of the child in seconds
+ * @param integer $max_y
+ * @param integer $min_y
  */
 function _setup_axis_scale(&$graph, $time_span, $max_y, $min_y)
 {
@@ -1882,6 +1948,10 @@ function _setup_axis_scale(&$graph, $time_span, $max_y, $min_y)
 
 /**
  * Create the image of the weight curve
+ * @param integer $child_id
+ * @param integer $ref_curve_id
+ * @param int $big
+ * @return string HTML to display the weight curve
  */
 function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0)
 {
@@ -1964,6 +2034,9 @@ function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0)
 
 /**
  * Add the length curve of te required child to the given image
+ * @param integer $child_id the id of the child
+ * @param integer $ref_curve_id the id of the rerefence curve to display
+ * @param int $big indicate how big the curve should be
  */
 function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0)
 {
@@ -2005,7 +2078,7 @@ function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0)
         }
     } else if ($child_id == 'reference') {
         // Show only the reference-curve
-        _add_official_curves($graph, $ref_curve_id, 'length', MAX_REF_CURVE_AGE, &$max_length, &$min_length);
+        $gs = _add_official_curves($graph, $ref_curve_id, 'length', MAX_REF_CURVE_AGE, &$max_length, &$min_length);
     } else {
         $child = _CheckAccess($child_id);
         if ($child == CHILDNOTFOUND) {
@@ -2043,6 +2116,8 @@ function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0)
 
 /**
  * This is a helper for links to things the user might want to check.
+ * @param integer $child_id the id of the child to create a link for
+ * @return string HTML that contains a link to the child edit page
  */
 function _linksToDateToCheck($child_id)
 {
@@ -2058,6 +2133,7 @@ function _linksToDateToCheck($child_id)
  * CheckDOBAndFirstMeasurementDiff will add a warning when the given birthdate
  * and the first measurement are to far appart. (Or when the first measurement
  * is before the given birthdate.)
+ * @param Child $child the child to check measurent dates for
  */
 function CheckDOBAndFirstMeasurementDiff($child)
 {
@@ -2087,6 +2163,8 @@ function CheckDOBAndFirstMeasurementDiff($child)
 
 /**
  *  growthcurve_view_curve
+ * @param integer $child_id the id of the child
+ * @return string HTML to display both curves
  */
 function growthcurve_view_curve($child_id = -1)
 {
@@ -2256,6 +2334,9 @@ function _getChildrenForUser($uid)
 
 /**
  * Find a user based on either the email-address or the host(ip-address) they mailed from
+ * @param string $email the email to search for
+ * @param string $host the host to search for
+ * @return string JSON to give search info
  */
 function growthcurve_user_search($email, $host = '')
 {
@@ -2292,7 +2373,11 @@ function growthcurve_user_search($email, $host = '')
     }
     $firephp->fb($messages, FirePHP::INFO);
 
-    class UserInfo {}
+    class UserInfo {
+        var $users;
+        var $messages;
+        var $children;
+    }
     $info = new UserInfo;
     $info->users = $users;
     $info->messages = $messages;
