@@ -378,14 +378,14 @@ function _CheckAccess( $child_id) {
 	return $child;
 }
 
-/**
+/*
  * Default response when the Child is not found
  */
 function _ErrorChildNotFound() {
   print theme('page', t('No child found with the given number') . '<br>' . _add_child_list_link());
 }
 
-/**
+/*
  * Default response when the Child is not yours
  */
 function _ErrorNotYourChild() {
@@ -468,7 +468,8 @@ function growthcurve_ref_curve_list() {
   return $output;
 }
 
-/**
+
+/*
  *
  */
 function growthcurve_admin() {
@@ -958,10 +959,6 @@ function _convert_date($matches, &$date) {
     } else {
       return FALSE;
     }
-    if ($date === FALSE) {
-      watchdog( 'gc', 'Error converting date ['.implode(",", $matches).'] (1).');
-      return FALSE;
-    }
     return TRUE;
 }
 
@@ -987,10 +984,6 @@ function form_validate_date( $str_date, &$date) {
   		return FALSE;
   	}
   } else {
-    return FALSE;
-  }
-  if ($date === FALSE) {
-    watchdog( 'gc', 'Error converting date ['.$str_date.'] (2).');
     return FALSE;
   }
   return TRUE;
@@ -1123,7 +1116,7 @@ function growthcurve_child_edit($child_id, $field_to_focus = NULL) {
   } else {
     $output .= _SetFocusField('name');
   }
-
+  
   print theme('page', $output);
 }
 
@@ -1234,13 +1227,6 @@ function _validate_measurement( &$the_measurements, $i, $groups = false) {
     //       But we need to make sure that the field is marked. Maybe we should talk to the Drupal developers about this!
     form_set_error('date_'.$i, t('You have to specify a valid date in the marked field.'));
     $all_ok = FALSE;
-  } else {
-    if ( $the_measurements['conv_date_'.$i] == null) {
-      // What to do with a null-date??
-      watchdog( 'gc', 'Error converting date ['.$the_measurements['date_'.$i].'] (3).');
-      form_set_error('date_'.$i, t('Er is iets mis met ons datum systeem waardoor we de gamarkeerde datum vandaag niet kunnen omzetten, probeer morgen nogmaals.'));
-      $all_ok = FALSE;
-    }
   }
 
   if ($groups) {
@@ -1381,7 +1367,7 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
     for ( i = 0; i < nr_of_rows[ 0].value; i++) {
       var del = document.getElementsByName( "edit[del_weight_" + i + "]");
       del[ 0].value = "ok";
-      // Now un-hide
+      // Now hide
       var row = getById( "row_" + i);
       row.style.display = "";
     }
@@ -1462,7 +1448,7 @@ function growthcurve_measurements($child_id = -1, $field_to_focus = NULL) {
     } else {
       // Save the details
       $i = 0; $nr_ins = 0; $nr_upd = 0; $nr_del = 0;
-      while ( $the_measurements['date_'.$i] || ( 'del' == $the_measurements['del_weight_'.$i])) {
+      while ( $the_measurements['date_'.$i]) {
         // See what needs to be done
         global $user;
         if ( $the_measurements['measurement_id_'.$i]) {
@@ -1473,10 +1459,6 @@ function growthcurve_measurements($child_id = -1, $field_to_focus = NULL) {
             $nr_del++;
           } else {
             //drupal_set_message( 'Update '.$the_measurements['measurement_id_'.$i]);
-            if (($the_measurements['conv_date_'.$i] == 0) || ($the_measurements['conv_date_'.$i] == null)) {
-            	// TODO: we could just stop here, as the date can never be 0 as we always aff 5 hours... (dirty hack)
-            	watchdog( 'gc', 'Something strange with the date...:'.$the_measurements['date_'.$i].",\n"._vds($the_measurements, 'the_measurements').'.');
-            }
             db_query( "UPDATE {growthcurve_measurements} SET moment = '%s', weight = %s, length = %s, comments = '%s' WHERE child_id = %d AND measurement_id = %d",
                       $the_measurements['conv_date_'.$i],
                       is_numeric( $the_measurements['weight_'.$i]) ? $the_measurements['weight_'.$i] : 'NULL',
@@ -1538,15 +1520,9 @@ function _get_graph_sizes($age) {
 	} elseif ($age <= 126144000) {
 		$gs->time_span = 4 * TS_YEAR;
 		$gs->xunits = TS_ARG_MONTH;
-	} elseif ($age <= 157680000) {
-		$gs->time_span = 5 * TS_YEAR;
-		$gs->xunits = TS_ARG_MONTH;
-	} elseif ($age <= 252288000) {
-		$gs->time_span = 8 * TS_YEAR;
-		$gs->xunits = TS_YEAR;
 	} else {
 		$gs->time_span = 18 * TS_YEAR;
-		$gs->xunits = TS_YEAR;
+		$gs->xunits = TS_ARG_MONTH;
 	}
 
 	return $gs;
@@ -1657,7 +1633,7 @@ function _add_official_curves( &$graph, $gender, $type, $age, &$max_value, &$min
     _add_official_curve( $graph, $moments, $measurement_nominal, $bgcolor, $line_colors[$grp], $rg_ref_curve['leg_'.$value_field_name]);
   }
 	// TODO: make this a link? (Using a Image-map??)
-	$graph->footer->left->Set( t( "Source: %source", array( '%source' => $ref_curve->name))." (http://www.borstvoeding.com)");
+	$graph->footer->left->Set( t( "Source: %source", array( '%source' => $ref_curve->name)));
 	$graph->footer->left->SetFont( FF_ARIAL, FS_BOLD, 8);
 	$graph->footer->left->SetColor( "firebrick");
 	// TODO: copyrights?
@@ -1776,26 +1752,13 @@ function _setup_axis_scale(&$graph, $time_span, $max_y, $min_y) {
 			$graph->xaxis->scale->ticks->Set(2, 1);
   		$graph->xaxis->SetTitle( t('months'));
 			break;
-		case 5 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 5 * 12);
-			$graph->xaxis->scale->ticks->Set(4, 1);
+		case 18 * TS_YEAR:
+			$graph->SetScale('linlin', $min_y, $max_y, 0, 8 * 12);
+			$graph->xaxis->scale->ticks->Set(2, 1);
   		$graph->xaxis->SetTitle( t('months'));
 			break;
-		case 8 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 8);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-  		$graph->xaxis->SetTitle( t('years'));
-			break;
-		case 18 * TS_YEAR:
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 18);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-			$graph->xaxis->SetTitle( t('years'));
-			break;
 		default:
-			watchdog( 'gc', 'Error setting axis scale, unknown timespan:'.$time_span.', default to 18 years.');
-			$graph->SetScale('linlin', $min_y, $max_y, 0, 18);
-			$graph->xaxis->scale->ticks->Set(2, 1);
-			$graph->xaxis->SetTitle( t('years'));
+			watchdog( 'gc', 'Error setting axis scale, unknown timespan:'.$time_span.'.');
 			break;
 	}
 }
@@ -1820,7 +1783,7 @@ function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0) 
   $graph->SetScale( "linlin");
   
   $graph->img->SetMargin( 55, 120, 40, 40);
-  $graph->SetShadow(false);
+  $graph->SetShadow();
   $graph->SetGridDepth(DEPTH_FRONT);
   
   // TODO: this should be a system setting
@@ -1842,17 +1805,13 @@ function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0) 
     }
   } else if ($child_id == 'reference') {
     // Show only the reference-curve
-    $gs = _add_official_curves( $graph, $ref_curve_id, 'weight', MAX_REF_CURVE_AGE, &$max_weight, &$min_weight);
+    _add_official_curves( $graph, $ref_curve_id, 'weight', MAX_REF_CURVE_AGE, &$max_weight, &$min_weight);
   } else {
 		$child = _CheckAccess( $child_id);
-		if ($child == CHILDNOTFOUND) {
+    if ($child == CHILDNOTFOUND) {
 			_add_graph_not_found_error( $graph);
-			$graph->Stroke();
-			return;
-		} else if ($child == NOTYOURCHILD) {
+    } else if ($child == NOTYOURCHILD) {
 			_add_graph_access_error( $graph);
-			$graph->Stroke();
-			return;
 		} else {
 			// Add the official graphs
 			$age = get_time_span_entered( $child_id);
@@ -1863,12 +1822,12 @@ function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0) 
 			$graph->Add($p);
 		}
   }
-  // Round to multiple of 100
-  $max_weight = $max_weight + (100 - ($max_weight % 100));
-  _setup_axis_scale(&$graph, $gs->time_span, $max_weight, 0);
-  $graph->yaxis->scale->ticks->Set(($big == 1) ? 1000 : 2000, 500);
+	// Round to multiple of 100
+	$max_weight = $max_weight + (100 - ($max_weight % 100));
+	_setup_axis_scale(&$graph, $gs->time_span, $max_weight, 0);
+	$graph->yaxis->scale->ticks->Set(($big == 1) ? 1000 : 2000, 500);
 
-  $graph->title->SetFont( FF_ARIAL, FS_BOLD, 16);
+	$graph->title->SetFont( FF_ARIAL, FS_BOLD, 16);
   // Setup the axis
   $graph->yaxis->SetTitle( t('grams'));
   $graph->yaxis->SetTitlemargin( 40);
@@ -1876,7 +1835,7 @@ function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0) 
   $graph->xgrid->Show();
   $graph->ygrid->Show();
   // Format the legend box
-  _format_legend( $graph->legend);
+	_format_legend( $graph->legend);
   $graph->Stroke();
   // and clear image from memory
 }
@@ -1901,7 +1860,7 @@ function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0) 
   $graph->SetScale( "linlin");
   
   $graph->img->SetMargin(55,120,40,40);
-  $graph->SetShadow(false);
+  $graph->SetShadow();
   $graph->SetGridDepth(DEPTH_FRONT);
   
   // TODO: this should be a system setting
