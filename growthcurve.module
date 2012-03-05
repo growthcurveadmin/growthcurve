@@ -51,7 +51,10 @@ function show($data, $func = "print_r", $return_str = false)
     $func($data);
     $output = '<pre>' . htmlspecialchars(ob_get_contents()) . '</pre>';
     ob_end_clean();
-    if ($return_str) return $output; else { echo $output; return ''; }
+    if ($return_str) return $output; else {
+        echo $output;
+        return '';
+    }
 }
 
 require_once("growthcurve.config");
@@ -547,7 +550,8 @@ function growthcurve_settings()
     return $output;
 }
 
-class RefCurve {
+class RefCurve
+{
     var $curve_id;
     var $name;
     var $nr_of_length_lines;
@@ -697,7 +701,7 @@ function growthcurve_admin_ref_edit($ref_id = '')
                 menu_rebuild();
                 drupal_goto('admin/growthcurve');
             }
-
+            break;
         default:
             $ref_curve = get_ref_curve($ref_id);
     }
@@ -983,13 +987,15 @@ function growthcurve_main()
     print theme('page', growthcurve_main_display());
 }
 
-class Child {
+class Child
+{
     var $child_id;
     var $name;
     var $gender;
     var $date;
     var $story;
     var $dob;
+    var $age;
 }
 
 /**
@@ -1180,7 +1186,7 @@ function growthcurve_child_edit($child_id, $field_to_focus = NULL)
                 menu_rebuild();
                 drupal_goto('growthcurve');
             }
-
+            break;
         default:
             $child = _get_child($child_id);
 
@@ -1523,6 +1529,9 @@ function growthcurve_measurements($child_id = -1, $field_to_focus = NULL)
         return;
     }
 
+    $child->age = get_time_span_entered($child_id);
+    ShowHintForMoreYears($child);
+
     $header_msg = t("Measurements of %name<br>\nOne can enter the date in the format yyyy-mmm-dd and dd-mm-yyyy. The weight should be in <b>grams</b>, the length should be in <b>centimeters</b>.", array('%name' => $child->name));
     $the_measurements = $_POST['edit'];
     $op = $_POST['op'];
@@ -1617,7 +1626,8 @@ define("TS_ARG_MONTH", 2628000);
 // Year: 60 * 60 * 24 * 365 = 31536000
 define("TS_YEAR", 31536000);
 
-class GraphSizes {
+class GraphSizes
+{
     var $time_span;
     var $xunits;
 }
@@ -2161,6 +2171,35 @@ function CheckDOBAndFirstMeasurementDiff($child)
     }
 }
 
+
+// Year: 60 * 60 * 24 * 365 = 31536000
+// Avarage month: 31536000 / 12 = 2628000
+define(ONE_MONTH_IN_SECONDS, 2628000);
+define(THREE_MONTH_IN_SECONDS, 3 * ONE_MONTH_IN_SECONDS);
+define(SIX_MONTH_IN_SECONDS, 6 * ONE_MONTH_IN_SECONDS);
+define(EIGHT_MONTH_IN_SECONDS, 8 * ONE_MONTH_IN_SECONDS);
+define(TWELVE_MONTH_IN_SECONDS, 31536000);
+define(FORTEEN_MONTH_IN_SECONDS, TWELVE_MONTH_IN_SECONDS + (2 * ONE_MONTH_IN_SECONDS));
+define(TWO_YEARS_IN_SECONDS, 2 * TWELVE_MONTH_IN_SECONDS);
+
+/**
+ * Add hints to messages for when the user needs to be notified of more features
+ * @param Child $child the child
+ */
+function ShowHintForMoreYears($child)
+{
+    if ($child->age >= THREE_MONTH_IN_SECONDS && $child->age <= SIX_MONTH_IN_SECONDS) {
+        // * at age 4-6 months about non-BV-voeding
+        drupal_set_message(t('Please know that you can still use the growth-curve-on-line when you stop breastfeeding'), 'warning');
+    } else if ($child->age >= EIGHT_MONTH_IN_SECONDS && $child->age <= TWELVE_MONTH_IN_SECONDS) {
+        // * at age of 8-12 months about more than 1 year
+        drupal_set_message(t('Please know that the curve will adjust to a span longer than 1 year/52 weeks after you add a date for a measurement of when the child is older than 1 year.'), 'warning');
+    } else if ($child->age >= FORTEEN_MONTH_IN_SECONDS && $child->age <= TWO_YEARS_IN_SECONDS) {
+        // * at age 14-24 months about 5 years
+        drupal_set_message(t('Please know that the curve will adjust to a span longer than 2 year/24 months after you add a date for a measurement of when the child is older than 2 years.'), 'warning');
+    }
+}
+
 /**
  *  growthcurve_view_curve
  * @param integer $child_id the id of the child
@@ -2189,6 +2228,9 @@ function growthcurve_view_curve($child_id = -1)
         }
         $output = t('The growth curves of %name<br>', array('%name' => $child->name));
         CheckDOBAndFirstMeasurementDiff($child);
+
+        $child->age = get_time_span_entered($child_id);
+        ShowHintForMoreYears($child);
     }
     // See if we can at all display a ref-curve...
     $ref_curve = _select_ref_curve($child->gender);
@@ -2373,11 +2415,13 @@ function growthcurve_user_search($email, $host = '')
     }
     $firephp->fb($messages, FirePHP::INFO);
 
-    class UserInfo {
+    class UserInfo
+    {
         var $users;
         var $messages;
         var $children;
     }
+
     $info = new UserInfo;
     $info->users = $users;
     $info->messages = $messages;
