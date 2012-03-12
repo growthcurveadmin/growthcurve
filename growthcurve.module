@@ -45,6 +45,20 @@ if (!function_exists('_vds')) {
     }
 }
 
+if (!function_exists('_vdsUser')) {
+    function _vdsUser($mixed, $title = '', $exit = false)
+    {
+        ob_start();
+        echo (!empty($title) ? ($title . ':') : '') . '<pre>';
+        var_dump($mixed);
+        echo "</pre>\n";
+        $output = ob_get_contents();
+        ob_end_clean();
+        if ($exit) exit;
+        return $output;
+    }
+}
+
 function show($data, $func = "print_r", $return_str = false)
 {
     ob_start();
@@ -458,6 +472,14 @@ function growthcurve_block($op = 'list', $delta = 0)
         return $block;
     }
 } // end growthcurve_block
+
+function growthcurve_cron() {
+    echo "Yes, we can do cron too! (from growthcurve)\n";
+    // TODO: make something useful:
+    // * select all children that have become 6 month and have not received a notification yet
+    // * create an email for those children
+    // ** using the vlibTemplate system and SwiftMailer for sending the emails.
+} // end growthcurve_cron
 
 /**
  * The reference curve list.
@@ -1206,6 +1228,21 @@ function growthcurve_child_edit($child_id, $field_to_focus = NULL)
     print theme('page', $output);
 }
 
+/**
+ * Hook login.
+ */
+function growthcurve_user($type, $edit, $user) {
+    if ($type != 'login') {
+        return;
+    }
+
+    if ($_REQUEST['destination'] == 'node'
+     || $_REQUEST['edit']['destination'] == 'node') {
+        $_REQUEST['destination'] = 'growthcurve';
+        drupal_goto('growthcurve');
+    }
+}
+
 function growthcurve_child_remove($child_id)
 {
     $child = _CheckAccess($child_id);
@@ -1577,7 +1614,7 @@ function growthcurve_measurements($child_id = -1, $field_to_focus = NULL)
                         //drupal_set_message( 'Update '.$the_measurements['measurement_id_'.$i]);
                         if (($the_measurements['conv_date_' . $i] == 0) || ($the_measurements['conv_date_' . $i] == null)) {
                             // TODO: we could just stop here, as the date can never be 0 as we always aff 5 hours... (dirty hack)
-                            watchdog('gc', 'Something strange with the date...:' . $the_measurements['date_' . $i] . ",\n" . _vds($the_measurements, 'the_measurements') . '.');
+                            watchdog('gc', 'Something strange with the date...:' . ($the_measurements['date_' . $i] == NULL || $the_measurements['date_' . $i] === NULL ? '(null)' : $the_measurements['date_' . $i]) . ",\n" . _vdsUser($the_measurements, 'the_measurements') . '.');
                         }
                         db_query("UPDATE {growthcurve_measurements} SET moment = '%s', weight = %s, length = %s, comments = '%s' WHERE child_id = %d AND measurement_id = %d",
                             $the_measurements['conv_date_' . $i],
@@ -2190,13 +2227,13 @@ function ShowHintForMoreYears($child)
 {
     if ($child->age >= THREE_MONTH_IN_SECONDS && $child->age <= SIX_MONTH_IN_SECONDS) {
         // * at age 4-6 months about non-BV-voeding
-        drupal_set_message(t('Please know that you can still use the growth-curve-on-line when you stop breastfeeding'), 'warning');
+        drupal_set_message(t('Tip: did you know that you can use the growth-curve-on-line no matter how you feed your baby?'), 'warning');
     } else if ($child->age >= EIGHT_MONTH_IN_SECONDS && $child->age <= TWELVE_MONTH_IN_SECONDS) {
         // * at age of 8-12 months about more than 1 year
-        drupal_set_message(t('Please know that the curve will adjust to a span longer than 1 year/52 weeks after you add a date for a measurement of when the child is older than 1 year.'), 'warning');
+        drupal_set_message(t('Tip: did you know you could continue using the growth-curve-on-line, even after 1 year? Even up to when your baby reaches the age of 5?'), 'warning');
     } else if ($child->age >= FORTEEN_MONTH_IN_SECONDS && $child->age <= TWO_YEARS_IN_SECONDS) {
         // * at age 14-24 months about 5 years
-        drupal_set_message(t('Please know that the curve will adjust to a span longer than 2 year/24 months after you add a date for a measurement of when the child is older than 2 years.'), 'warning');
+        drupal_set_message(t('Tip: did you know you could continue using the growth-curve-on-line, even after 2 years? Even up to when your baby reaches the age of 5?'), 'warning');
     }
 }
 
