@@ -479,6 +479,11 @@ function growthcurve_cron() {
     // * select all children that have become 6 month and have not received a notification yet
     // * create an email for those children
     // ** using the vlibTemplate system and SwiftMailer for sending the emails.
+
+    // Do all this using libraries:
+    // Swift: http://swiftmailer.org/
+    // vLib: http://vlib.clausvb.de/
+
 } // end growthcurve_cron
 
 /**
@@ -1241,7 +1246,7 @@ function growthcurve_user($type, $edit, $user) {
         $_REQUEST['destination'] = 'growthcurve';
         drupal_goto('growthcurve');
     }
-}
+} // end growthcurve_user
 
 function growthcurve_child_remove($child_id)
 {
