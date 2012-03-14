@@ -2232,13 +2232,13 @@ function ShowHintForMoreYears($child)
 {
     if ($child->age >= THREE_MONTH_IN_SECONDS && $child->age <= SIX_MONTH_IN_SECONDS) {
         // * at age 4-6 months about non-BV-voeding
-        drupal_set_message(t('Tip: did you know that you can use the growth-curve-on-line no matter how you feed your baby?'), 'warning');
+        drupal_set_message(t('Tip: do you know you can use the growth-curve-on-line no matter how you feed your baby?'), 'warning');
     } else if ($child->age >= EIGHT_MONTH_IN_SECONDS && $child->age <= TWELVE_MONTH_IN_SECONDS) {
         // * at age of 8-12 months about more than 1 year
-        drupal_set_message(t('Tip: did you know you could continue using the growth-curve-on-line, even after 1 year? Even up to when your baby reaches the age of 5?'), 'warning');
+        drupal_set_message(t('Tip: do you know you can continue using the growth-curve-on-line, after 1 year? Even up to when your baby reaches the age of 5?'), 'warning');
     } else if ($child->age >= FORTEEN_MONTH_IN_SECONDS && $child->age <= TWO_YEARS_IN_SECONDS) {
         // * at age 14-24 months about 5 years
-        drupal_set_message(t('Tip: did you know you could continue using the growth-curve-on-line, even after 2 years? Even up to when your baby reaches the age of 5?'), 'warning');
+        drupal_set_message(t('Tip: do you know you can continue using the growth-curve-on-line, even after 2 years? Even up to when your baby reaches the age of 5?'), 'warning');
     }
 }
 
