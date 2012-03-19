@@ -2013,8 +2013,8 @@ function growthcurve_view_curve_weight($child_id, $ref_curve_id = -1, $big = 0)
 
     isHTMLOutput(false);
 
-    $graphWidth = 600;
-    $graphHeight = 400;
+    $graphWidth = 670;
+    $graphHeight = 420;
     if ($big == 1) {
         $graphWidth = 1024;
         $graphHeight = 768;
@@ -2098,8 +2098,8 @@ function growthcurve_view_curve_length($child_id, $ref_curve_id = -1, $big = 0)
 
     isHTMLOutput(false);
 
-    $graphWidth = 600;
-    $graphHeight = 400;
+    $graphWidth = 670;
+    $graphHeight = 420;
     if ($big == 1) {
         $graphWidth = 1024;
         $graphHeight = 768;
