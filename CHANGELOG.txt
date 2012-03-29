@@ -1,0 +1,20 @@
+Upcomming: Growthcurve 3.0.0, 2012-04-15
+------------------------
+- hints about using Gowthcurve even after 6 month, 1 & 2 years
+- code-cleanups with help of PHPStorm
+
+Growthcurve 2.0.0, 2007-11-23
+------------------------
+- data-of-birth check & hints
+
+Growthcurve 1.0.0, 2006-12-13
+------------------------
+- some cleanup
+
+Growthcurve 1.0.0, 2006-07-15
+------------------------
+- released to the public
+
+Growthcurve 0.8.0, 2006-07-15
+------------------------
+- initial release
