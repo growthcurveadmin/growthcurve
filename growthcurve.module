@@ -1476,8 +1476,8 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
     $header[] = array('data' => t('Operations'), 'colspan' => 1);
     $content .= theme('table', $header, $rows, array('id' => 'measurements'));
     $content .= form_hidden('next_row_nr', $i);
-    $content .= form_submit(t('Save and add more'), 'op', array('title' => t('Save your current entries and make space for some more.')));
-    $content .= form_button(t('Undelete'), 'op', 'submit', array('onclick' => 'javascript:undelete(); return false;', 'title' => t('Show the deleted rows again (works only before a save is done!)')));
+    $content .= form_submit(t('Save and add more'), 'op', array('title' => t('Save your current entries and make space for some more.'), 'id' => 'submitSaveAndAddMore'));
+    $content .= form_button(t('Undelete'), 'op', 'submit', array('onclick' => 'javascript:undelete(); return false;', 'title' => t('Show the deleted rows again (works only before a save is done!)'), 'id' => 'submitUndelete'));
     //$content .= form_button(t('Add row'), 'op', 'submit', array( 'onclick' => 'javascript:addRows(1); return false;', 'title' => t('Add some empty rows')));
     // Focus the first empty field or the first field with an error...
     $errors = form_get_errors();
@@ -1538,11 +1538,18 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
     // Add one
     nr_of_rows[ 0].value = nr_of_rows[ 0].value + 1;
   }
+
+    function disableSubmits() {
+        getById("submitSaveAndAddMore").disabled = "disabled";
+        getById("submitUndelete").disabled = "disabled";
+        return true;
+    }
+
   //-->
 </SCRIPT>
 ';
 
-    return form($content);
+    return form($content, 'post', NULL, array('id' => 'measurementsForm', 'name' => 'measurementsForm', 'onsubmit' => 'return disableSubmits()'));
 }
 
 /**
