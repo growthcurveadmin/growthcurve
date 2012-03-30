@@ -1476,9 +1476,11 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
     $header[] = array('data' => t('Operations'), 'colspan' => 1);
     $content .= theme('table', $header, $rows, array('id' => 'measurements'));
     $content .= form_hidden('next_row_nr', $i);
+    $content .= '<div style="width: 375px; height: 15px; padding: auto;"><div style="width: 100%;" id="submitButtons">';
     $content .= form_submit(t('Save and add more'), 'op', array('title' => t('Save your current entries and make space for some more.'), 'id' => 'submitSaveAndAddMore'));
     $content .= form_button(t('Undelete'), 'op', 'submit', array('onclick' => 'javascript:undelete(); return false;', 'title' => t('Show the deleted rows again (works only before a save is done!)'), 'id' => 'submitUndelete'));
     //$content .= form_button(t('Add row'), 'op', 'submit', array( 'onclick' => 'javascript:addRows(1); return false;', 'title' => t('Add some empty rows')));
+    $content .= '</div><div style="width: 375px; display: none; margin: auto; padding-top: 8px;" id="submitProgress"><img style="display: block; margin: auto;" src="./modules/growthcurve/ajax-loader.gif"></div></div>';
     // Focus the first empty field or the first field with an error...
     $errors = form_get_errors();
     if ($errors) {
@@ -1540,8 +1542,8 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
   }
 
     function disableSubmits() {
-        getById("submitSaveAndAddMore").disabled = "disabled";
-        getById("submitUndelete").disabled = "disabled";
+        getById("submitButtons").style.display = "none";
+        getById("submitProgress").style.display = "block";
         return true;
     }
 
@@ -1549,7 +1551,7 @@ function _weight_table($header_msg, $rows, $field_to_focus = NULL, $add_groups =
 </SCRIPT>
 ';
 
-    return form($content, 'post', NULL, array('id' => 'measurementsForm', 'name' => 'measurementsForm', 'onsubmit' => 'return disableSubmits()'));
+    return form($content, 'post', NULL, array('onsubmit' => 'return disableSubmits()'));
 }
 
 /**
